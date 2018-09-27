@@ -3,6 +3,14 @@
 #include <stack>
 #include <queue>
 
+
+
+void Graph:find(NodeContent node_content, Node **& ptr){
+	while(ptr != nullptr && (*ptr)->node_content != node_content){
+		ptr = &((*ptr)->)
+	}
+}
+
 void Graph::insert_node(NodeContent node_content){
 	Node* node = new Node();
 	node.node_content = node_content;
@@ -12,13 +20,12 @@ void Graph::insert_node(NodeContent node_content){
 void Graph::delete_node(NodeContent node_content){
 	for(NodesIterator it = NodesVector.begin();it != NodesVector.end();it++){
 		if((*it)->node_content == node_content){
-			
+			NodesVector.erase(it);
 		}
 	}
 }
 
 void Graph::insert_edge(EdgeContent edge, NodeContent start, NodeContentint end, bool is_directed){
-
 
 	ource_node->edges.push_back(e);
 }

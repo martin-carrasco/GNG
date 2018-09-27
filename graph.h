@@ -74,6 +74,7 @@ public:
 		int next(int current, int target) // Devuelve el siguiente nodo a visitar
 		*/
 };
+class Iterator
 struct EdgeBase{
 	int weight;
 	string label;
