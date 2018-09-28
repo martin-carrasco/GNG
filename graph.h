@@ -49,6 +49,8 @@ public:
     
     typedef std::vector<Node*>  NodesVector;
     typedef std::list<Edge*>    EdgesList;
+    typedef std::stack<Node*>   NodesStack;
+    typedef std::queue<Node*>   NodesQueue;
     
     typedef typename Trait::NodeContent     NodeContent;
     typedef typename Trait::EdgeContent     EdgeContent;
@@ -57,7 +59,7 @@ public:
 
 	Graph() = default;                              
 
-	void find(NodeContent content, Node **& ptr);
+	void find(NodeContent content, Node **& ptr); //find ??
 	void insert_node(NodeContent node_content); // Crea un node y lo añade con el contenido dado
 	void delete_node(NodeContent node); //Remueve un node basado en su contenido
 	void insert_edge(EdgeContent edge, NodeContent start, NodeContent end, bool is_directed); //Añade una arista
@@ -73,11 +75,6 @@ public:
 		Node bfs(int source); //Bredth.-first-search
 		int next(int current, int target) // Devuelve el siguiente nodo a visitar
 		*/
-};
-class Iterator
-struct EdgeBase{
-	int weight;
-	string label;
 };
 
 class CustomTrait{

@@ -4,11 +4,12 @@
 #include <queue>
 
 
-
-void Graph:find(NodeContent node_content, Node **& ptr){
-	while(ptr != nullptr && (*ptr)->node_content != node_content){
-		ptr = &((*ptr)->)
+Node* find_node(NodeContent content){
+	for(NodesIterator it = NodesVector.begin();it != NodesVector.end();it++){
+		if((*it)->node_content == content)
+			return *it;
 	}
+	return nullptr;
 }
 
 void Graph::insert_node(NodeContent node_content){
@@ -25,9 +26,23 @@ void Graph::delete_node(NodeContent node_content){
 	}
 }
 
-void Graph::insert_edge(EdgeContent edge, NodeContent start, NodeContentint end, bool is_directed){
+void Graph::insert_edge(EdgeContent edge_content, NodeContent start, NodeContentint end, bool is_directed){
+	Edge* edge = new Edge();
+	Node * vertices = new Node[2];
+	vertices[0] = find_node(start);
+	vertices[1] = find_node(end);
 
-	ource_node->edges.push_back(e);
+	if(vertices[1] == nullptr || vertices[0] == nullptr)
+		return;
+
+	edge->edge_content = edge_content;
+	edge->is_directed = is_directed;
+	edge->vertices[0] = vertices[0];
+	edges->vertices[1] = vertices[1];
+
+
+	vertices[1]->edge_list.push_back(edge);
+	vertices[0]->edge_list.push_back(edge);
 }
 
 void Graph::delete_edge(NodeContent start, NodeContent end){
@@ -57,9 +72,14 @@ void Graph::delete_edge(NodeContent start, NodeContent end){
 }
 
 //Depth-first Search
-vector<Node*> Graph::dfs(NodeContent node){
-	vector<Node*> discovered;
-	stack<Node*> node_stack;
+NodesVector Graph::dfs(NodeContent content){
+	NodesVector discovered;
+	NodesStack node_stack;
+	Node* node = find_node(content);
+	
+	if(content == nullptr)
+		return discovered;
+		
 	node_stack.push(node);
 	while(!node_stack.empty()){
 		Node* current = node_stack.top();
@@ -76,9 +96,15 @@ vector<Node*> Graph::dfs(NodeContent node){
 }
 
 //Bredth-first Search
-vector<Node*> Graph::bfs(NodeContent node){
-	vector<Node*> discovered;
-	queue<Node*> node_queue;
+NodesVector Graph::bfs(NodeContent content){
+	NodesVector discovered;
+	NodesQueue node_queue;
+	Node* node = find_node(content);
+	
+	if(content == nullptr)
+		return discovered;
+		
+
 	node_queue.push(node);
 	while(!node_queue.empty()){
 		Node* current = node_queue.next();
@@ -91,6 +117,7 @@ vector<Node*> Graph::bfs(NodeContent node){
 		}
 		
 	}
+	return discovered;
 }
 
 vector<Edge*> Graph::kruskal(){
@@ -101,14 +128,11 @@ vector<Edge*> Graph::kruskal(){
 }
 
 void Graph::describe(){
-	for(auto node : graph_strct){
-		cout << "Node" << node->tag << " -> ";
-		for(auto e : node->edges){
-			cout << "Node" << e->dest->tag; 
+	for(auto node : nodes_vector){
+		cout << "Node" << node->node_content << " -> ";
+		for(auto e : node->edge_list){
+			cout << "Node" << e->vertices[1]->node_content; 
 		}
 		cout << endl;
 	}
-}
-void Graph::remove_node(Node* node){
-	//TODO
 }

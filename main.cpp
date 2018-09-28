@@ -5,6 +5,8 @@ using namespace std;
 
 
 int main(){
+	Graph<CustomTrait> grafo;
+	
  	Node* n = new Node();
  	Node* n2 = new Node();
 	Node* n3 = new Node();
