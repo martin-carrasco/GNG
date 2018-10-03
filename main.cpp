@@ -101,7 +101,7 @@ public:
 
 	typedef std::vector<Node*>  NodesVector;
 	typedef std::queue<Node*>   NodesQueue;
-	typedef std::list<Edge*>    EdgesList;
+	typedef std::vector<Edge*>    EdgesList;
 
 	typedef typename Trait::NodeContent     NodeContent;
 	typedef typename Trait::EdgeContent     EdgeContent;
@@ -115,7 +115,7 @@ private:
 	EdgesIterator edges_iterator;
 
 	Node* find_node(NodeContent content){
-		for(NodesIterator it = nodes_vector.begin(); it != nodes_vector.end();it++){
+		for(auto it = nodes_vector.begin(); it != nodes_vector.end();it++){
 			if((*it)->getNode_content() == content)
 				return *it;
 		}
@@ -166,15 +166,20 @@ public:
 
 		//Iteramos en la lista de aristas que estan relacionadas al nodo que buscamos borrar
 		//LLamamos a la funcion delete_edge con el nodo relacionado y aseguramos que se borre adecuadamente
-		for(EdgesIterator it = node->getEdges_list().begin();
+		for(auto it = node->getEdges_list().begin();
 				it != node->getEdges_list().end();
 				it++){
+
+			if(*it == nullptr) //  ???
+				continue;
+
 			Edge* tmp_edge = *it;
 			if(tmp_edge->getVertices()[0] == node || tmp_edge->getVertices()[1] == node) {
 				NodeContent content_end = tmp_edge->getVertices()[0] == node
 						? tmp_edge->getVertices()[1]->getNode_content()
 						: content;
 				delete_edge(content, content_end, tmp_edge->getEdge_content());
+				break;
 			}
 
 		}
@@ -183,7 +188,7 @@ public:
 		//y liberamos el puntero
 		for(nodes_iterator = nodes_vector.begin();nodes_iterator != nodes_vector.end();nodes_iterator++){
 			if(*nodes_iterator == node)
-				nodes_vector.erase(nodes_iterator);
+				nodes_vector.erase(nodes_iterator);break;
 		}
 
 		delete node;
@@ -196,7 +201,7 @@ public:
 		if(start_node == nullptr || end_node == nullptr)
 			return false;
 
-		Edge* edge = find_edge(start_node, end_node);
+		Edge* edge = find_edge(start_node, end_node, content);
 
 		if(edge == nullptr)
 			return false;
@@ -217,14 +222,17 @@ public:
 			if(tmp_edge == edge) {
 				to_be_delted = tmp_edge;
 				tmpEdgeListStart.erase(edges_iterator);
+				break;
 			}
 		}
+
 		for(edges_iterator = tmpEdgeListEnd.begin();
 			edges_iterator != tmpEdgeListEnd.end();edges_iterator++){
 			Edge* tmp_edge = *edges_iterator;
 			if(tmp_edge == edge) {
 				assert(tmp_edge == to_be_delted);
 				tmpEdgeListEnd.erase(edges_iterator);
+				break;
 			}
 		}
 
@@ -261,6 +269,16 @@ public:
 		return discovered;
 	}
 
+
+	/*NodesVector prim(NodeContent content){
+		Node* base_node = find_node(content);
+
+		if(base_node== nullptr)
+			return ;
+
+
+	}*/
+
 	void describe() {
 		for(auto node : nodes_vector){
 			std::cout << "Node " << node->getNode_content() << " -> ";
@@ -291,6 +309,8 @@ int main(int argc, char *argv[]) {
 	graph.insert_edge(10, "A", "B", true);
 	graph.insert_edge(10, "C", "B", true);
 	graph.insert_edge(5, "C", "A", true);
+
+	graph.delete_node("B");
 
 	graph.describe();
 
