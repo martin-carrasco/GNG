@@ -164,22 +164,20 @@ public:
 		if(node == nullptr)
 			return false;
 
+
+		EdgesList tmpEdgeList = node->getEdges_list();
+
 		//Iteramos en la lista de aristas que estan relacionadas al nodo que buscamos borrar
 		//LLamamos a la funcion delete_edge con el nodo relacionado y aseguramos que se borre adecuadamente
-		for(auto it = node->getEdges_list().begin();
-				it != node->getEdges_list().end();
-				it++){
-
-			if(*it == nullptr) //  ???
-				continue;
+		for(auto it = tmpEdgeList.begin();it != tmpEdgeList.end();it++){
 
 			Edge* tmp_edge = *it;
 			if(tmp_edge->getVertices()[0] == node || tmp_edge->getVertices()[1] == node) {
-				NodeContent content_end = tmp_edge->getVertices()[0] == node
-						? tmp_edge->getVertices()[1]->getNode_content()
-						: content;
-				delete_edge(content, content_end, tmp_edge->getEdge_content());
-				break;
+				NodeContent content_end = tmp_edge->getVertices()[1] == node
+						? tmp_edge->getVertices()[0]->getNode_content()
+						: content; //Determina el nodo opuesto
+
+				delete_edge(content_end, content, tmp_edge->getEdge_content());
 			}
 
 		}
@@ -188,7 +186,7 @@ public:
 		//y liberamos el puntero
 		for(nodes_iterator = nodes_vector.begin();nodes_iterator != nodes_vector.end();nodes_iterator++){
 			if(*nodes_iterator == node)
-				nodes_vector.erase(nodes_iterator);break;
+				nodes_vector.erase(nodes_iterator);
 		}
 
 		delete node;
@@ -310,6 +308,8 @@ int main(int argc, char *argv[]) {
 	graph.insert_edge(10, "C", "B", true);
 	graph.insert_edge(5, "C", "A", true);
 
+	//graph.delete_edge("C", "B", 10);
+	//graph.delete_edge("C", "A", 5);
 	graph.delete_node("B");
 
 	graph.describe();
