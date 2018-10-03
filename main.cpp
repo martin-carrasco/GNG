@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <algorithm>
 #include <queue>
 #include <assert.h>
 
@@ -164,22 +165,20 @@ public:
 		if(node == nullptr)
 			return false;
 
+
+		EdgesList tmpEdgeList = node->getEdges_list();
+
 		//Iteramos en la lista de aristas que estan relacionadas al nodo que buscamos borrar
 		//LLamamos a la funcion delete_edge con el nodo relacionado y aseguramos que se borre adecuadamente
-		for(auto it = node->getEdges_list().begin();
-				it != node->getEdges_list().end();
-				it++){
-
-			if(*it == nullptr) //  ???
-				continue;
+		for(auto it = tmpEdgeList.begin();it != tmpEdgeList.end();it++){
 
 			Edge* tmp_edge = *it;
 			if(tmp_edge->getVertices()[0] == node || tmp_edge->getVertices()[1] == node) {
-				NodeContent content_end = tmp_edge->getVertices()[0] == node
-						? tmp_edge->getVertices()[1]->getNode_content()
-						: content;
-				delete_edge(content, content_end, tmp_edge->getEdge_content());
-				break;
+				NodeContent content_end = tmp_edge->getVertices()[1] == node
+						? tmp_edge->getVertices()[0]->getNode_content()
+						: content; //Determina el nodo opuesto
+
+				delete_edge(content_end, content, tmp_edge->getEdge_content());
 			}
 
 		}
@@ -188,7 +187,7 @@ public:
 		//y liberamos el puntero
 		for(nodes_iterator = nodes_vector.begin();nodes_iterator != nodes_vector.end();nodes_iterator++){
 			if(*nodes_iterator == node)
-				nodes_vector.erase(nodes_iterator);break;
+				nodes_vector.erase(nodes_iterator);
 		}
 
 		delete node;
@@ -249,18 +248,20 @@ public:
 		NodesQueue node_queue;
 		Node* node = find_node(content);
 
-		if(content == nullptr)
+		if(node ==  nullptr)
 			return discovered;
-
 
 		node_queue.push(node);
 		while(!node_queue.empty()){
-			Node* current = node_queue.next();
+			Node* current = node_queue.front();
 			node_queue.pop();
-			if(find(discovered.begin(), discovered.end(), current)  == discovered.end()){
+			if(std::find(discovered.begin(), discovered.end(), current)  == discovered.end()){
 				discovered.push_back(current);
-				for(auto edge : current->edges){
-					node_queue.push(edge->dest);
+				for(Edge* edge : current->getEdges_list()){
+				    Node* to_be_added = edge->getDest(current);
+				    if(to_be_added == nullptr) //|| std::find(discovered.begin(), discovered.end(), to_be_added) == discovered.end())
+				        continue;
+					node_queue.push(edge->getDest(current));
 				}
 			}
 
@@ -268,6 +269,7 @@ public:
 
 		return discovered;
 	}
+
 
 
 	/*NodesVector prim(NodeContent content){
@@ -291,6 +293,18 @@ public:
 			std::cout << std::endl;
 		}
 	}
+	void describe_helper(NodesVector to_describe){
+        for(auto node : to_describe){
+            std::cout << "Node " << node->getNode_content() << " -> ";
+            for(auto e : node->getEdges_list()){
+                Node* dest = e->getDest(node);
+                if(dest == nullptr)
+                    continue;
+                cout << "Node " << dest->getNode_content() << " ";
+            }
+            std::cout << std::endl;
+        }
+	}
 };
 
 class CustomTrait {
@@ -305,14 +319,26 @@ int main(int argc, char *argv[]) {
 	graph.insert_node("A");
 	graph.insert_node("B");
 	graph.insert_node("C");
+    graph.insert_node("D");
+    graph.insert_node("E");
+    graph.insert_node("F");
+    graph.insert_node("Z");
+    graph.insert_node("X");
 
-	graph.insert_edge(10, "A", "B", true);
-	graph.insert_edge(10, "C", "B", true);
-	graph.insert_edge(5, "C", "A", true);
+	graph.insert_edge(1, "A", "C", true);
+	graph.insert_edge(1, "A", "B", true);
+    graph.insert_edge(1, "B", "D", true);
+    graph.insert_edge(1, "C", "F", true);
+    graph.insert_edge(1, "C", "E", true);
+    graph.insert_edge(1, "Z", "X", true);
 
-	graph.delete_node("B");
 
-	graph.describe();
+    //graph.delete_edge("C", "B", 10);
+	//graph.delete_edge("C", "A", 5);
+	//graph.delete_node("B");
+
+	graph.describe_helper(graph.bfs("A"));
+	//graph.describe();
 
 	return 0;
 }
