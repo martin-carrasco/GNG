@@ -187,7 +187,10 @@ public:
 		for(auto node : nodes_vector){
 			std::cout << "Node " << node->getNode_content() << " -> ";
 			for(auto e : node->getEdges_list()){
-				cout << "Node " << (e->getDest(node))->getNode_content() << " ";
+				Node* dest = e->getDest(node);
+				if(dest == nullptr)
+					continue;
+				cout << "Node " << dest->getNode_content() << " ";
 			}
 			std::cout << std::endl;
 		}
@@ -207,8 +210,9 @@ int main(int argc, char *argv[]) {
 	graph.insert_node("B");
 	graph.insert_node("C");
 
-	graph.insert_edge(10, "A", "B", false);
-	graph.insert_edge(10, "A", "C", true);
+	graph.insert_edge(10, "A", "B", true);
+	graph.insert_edge(10, "C", "B", true);
+	graph.insert_edge(5, "C", "A", true);
 
 	graph.describe();
 
