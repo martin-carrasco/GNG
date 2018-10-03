@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <queue>
+#include <assert.h>
 
 using namespace std;
 
@@ -113,9 +114,6 @@ private:
 	NodesIterator nodes_iterator;
 	EdgesIterator edges_iterator;
 
-public:
-	Graph() = default;
-
 	Node* find_node(NodeContent content){
 		for(NodesIterator it = nodes_vector.begin(); it != nodes_vector.end();it++){
 			if((*it)->getNode_content() == content)
@@ -124,17 +122,24 @@ public:
 
 		return nullptr;
 	}
+	Edge* find_edge(Node* start, Node* end, EdgeContent content){
+		for(Edge* e : start->getEdges_list()){
+			if(e->getEdge_content() == content &&
+				e->getVertices()[0] == start &&
+				e->getVertices()[1] == end)
+
+				return e;
+		}
+		return nullptr;
+	}
+public:
+	Graph() = default;
 
 	bool insert_node(NodeContent node_content) {
 		Node *node = new Node();
 		node->setNode_content(node_content);
 		nodes_vector.push_back(node);
 		return true;
-	}
-
-	bool delete_node(NodeContent node_content) {
-		/* ... */
-		return false;
 	}
 
 	void insert_edge(EdgeContent edge_content, NodeContent start, NodeContent end, bool is_directed) {
@@ -153,9 +158,82 @@ public:
 		b->addEdge(edge);
 	}
 
-	bool delete_edge(NodeContent start, NodeContent end) {
-		/* ... */
-		return false;
+	bool delete_node(NodeContent content){
+		Node* node = find_node(content);
+
+		if(node == nullptr)
+			return false;
+
+		//Iteramos en la lista de aristas que estan relacionadas al nodo que buscamos borrar
+		//LLamamos a la funcion delete_edge con el nodo relacionado y aseguramos que se borre adecuadamente
+		for(EdgesIterator it = node->getEdges_list().begin();
+				it != node->getEdges_list().end();
+				it++){
+			Edge* tmp_edge = *it;
+			if(tmp_edge->getVertices()[0] == node || tmp_edge->getVertices()[1] == node) {
+				NodeContent content_end = tmp_edge->getVertices()[0] == node
+						? tmp_edge->getVertices()[1]->getNode_content()
+						: content;
+				delete_edge(content, content_end, tmp_edge->getEdge_content());
+			}
+
+		}
+
+		//Finalmente hacemos una iteracion en la el vector de nodos, lo borramos de ahi
+		//y liberamos el puntero
+		for(nodes_iterator = nodes_vector.begin();nodes_iterator != nodes_vector.end();nodes_iterator++){
+			if(*nodes_iterator == node)
+				nodes_vector.erase(nodes_iterator);
+		}
+
+		delete node;
+	}
+
+	bool delete_edge(NodeContent start, NodeContent end, EdgeContent content) {
+		Node* start_node = find_node(start);
+		Node* end_node = find_node(end);
+
+		if(start_node == nullptr || end_node == nullptr)
+			return false;
+
+		Edge* edge = find_edge(start_node, end_node);
+
+		if(edge == nullptr)
+			return false;
+
+
+		EdgesList tmpEdgeListStart = start_node->getEdges_list();
+		EdgesList tmpEdgeListEnd = end_node->getEdges_list();
+		Edge* to_be_delted = nullptr;
+
+		//Iteramos a lo largo de las dos listas de edges y al encontrarlo
+		//lo añadimos a un vector temporal que despues reemplazaremos por el vector
+		//contenido en cada Node
+		//Finalmente guardamos el puntero a Edge para poder liberar su memoria
+
+		for(edges_iterator = tmpEdgeListStart.begin();
+					edges_iterator != tmpEdgeListStart.end();edges_iterator++){
+			Edge* tmp_edge = *edges_iterator;
+			if(tmp_edge == edge) {
+				to_be_delted = tmp_edge;
+				tmpEdgeListStart.erase(edges_iterator);
+			}
+		}
+		for(edges_iterator = tmpEdgeListEnd.begin();
+			edges_iterator != tmpEdgeListEnd.end();edges_iterator++){
+			Edge* tmp_edge = *edges_iterator;
+			if(tmp_edge == edge) {
+				assert(tmp_edge == to_be_delted);
+				tmpEdgeListEnd.erase(edges_iterator);
+			}
+		}
+
+		start_node->setEdges_list(tmpEdgeListStart);
+		end_node->setEdges_list(tmpEdgeListEnd);
+
+		delete to_be_delted;
+
+		return true;
 	}
 
 	NodesVector bfs (NodeContent content){
