@@ -6,7 +6,7 @@ auto Graph<CustomTrait>::get_edgesVector() {
     vector<Edge*> visited;
     for(Node* node : nodes_vector){
         for(Edge* e : node->getEdges_list())
-            if(find(visited.begin() ,visited.end() ,e) != visited.end())
+            if(find(visited.begin() ,visited.end() ,e) == visited.end())
                 visited.push_back(e);
     }
     return visited;
@@ -259,6 +259,26 @@ template <class CustomTrait>
 auto Graph<CustomTrait>::get_nodesVector(){
     return nodes_vector;
 }
+
+template<class Trait>
+auto Graph<Trait>::find_edge_between_nodes(NodeContent start, NodeContent end) {
+    NodePtr node_start = find_node(start);
+    NodePtr node_end = find_node(start);
+
+    for(EdgePtr edge : node_start->get_Edgelist()){
+        if(edge->getDest() == node_end)
+            return edge;
+    }
+    return nullptr;
+}
+
+template<class Trait>
+void Graph<Trait>::clear() {
+    for(NodePtr n : nodes_vector){
+        this->delete_node(n->getNode_content());
+    }
+}
+
 
 /* template<class CustomTrait>
  NodesVector Graph<CustomTrait>::dijkstra(NodeContent start) {

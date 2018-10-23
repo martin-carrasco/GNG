@@ -41,6 +41,9 @@ public:
     void setNode_content(NodeContent node_content) {
         Node::node_content = node_content;
     }
+    bool operator==(Node &node){
+        return this->node_content == node.node_content;
+    }
 };
 
 template <class GraphTrait>
@@ -99,6 +102,9 @@ public:
     typedef ::Node< Graph<Trait> > Node;
     typedef ::Edge< Graph<Trait> > Edge;
 
+    typedef Node* NodePtr;
+    typedef Edge* EdgePtr;
+
     typedef std::vector<Node*>  NodesVector;
     typedef std::queue<Node*>   NodesQueue;
     typedef std::stack<Node*>   NodesStack;
@@ -116,8 +122,10 @@ private:
 
     auto find_node(NodeContent content);
     auto find_edge(Node* start, Node* end, EdgeContent content);
-
+    auto find_edge_between_nodes(NodeContent start, NodeContent end);
 public:
+    void clear();
+
     auto get_edgesVector();
     auto get_nodesVector();
 
@@ -143,6 +151,13 @@ public:
 class CustomTrait {
 public:
     typedef std::string NodeContent;
+    typedef int EdgeContent;
+};
+class GNGTrait {
+    struct NodeContent {
+        int pos[2];
+        double error;
+    };
     typedef int EdgeContent;
 };
 #include "graph.cpp"
