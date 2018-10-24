@@ -255,22 +255,6 @@ void Graph<CustomTrait>::describe_helper(NodesVector to_describe){
     }
 }
 
-template <class CustomTrait>
-auto Graph<CustomTrait>::get_nodesVector(){
-    return nodes_vector;
-}
-
-template<class Trait>
-auto Graph<Trait>::find_edge_between_nodes(NodeContent start, NodeContent end) {
-    NodePtr node_start = find_node(start);
-    NodePtr node_end = find_node(start);
-
-    for(EdgePtr edge : node_start->get_Edgelist()){
-        if(edge->getDest() == node_end)
-            return edge;
-    }
-    return nullptr;
-}
 
 template<class Trait>
 void Graph<Trait>::clear() {

@@ -122,12 +122,13 @@ private:
 
     auto find_node(NodeContent content);
     auto find_edge(Node* start, Node* end, EdgeContent content);
-    auto find_edge_between_nodes(NodeContent start, NodeContent end);
 public:
     void clear();
 
     auto get_edgesVector();
-    auto get_nodesVector();
+    NodesVector get_nodesVector(){
+        return nodes_vector;
+    }
 
     bool is_directed();
     unsigned long size();
@@ -154,6 +155,7 @@ public:
     typedef int EdgeContent;
 };
 class GNGTrait {
+public:
     struct NodeContent {
         int pos[2];
         double error;
