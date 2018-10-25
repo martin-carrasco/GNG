@@ -7,6 +7,9 @@
 #include <vector>
 #include <string>
 #include <assert.h>
+#include <unordered_map>
+#include <fstream>
+#include <map>
 
 template <class GraphTrait>
 class Node {
@@ -40,9 +43,6 @@ public:
 
     void setNode_content(NodeContent node_content) {
         Node::node_content = node_content;
-    }
-    bool operator==(Node &node){
-        return this->node_content == node.node_content;
     }
 };
 
@@ -102,13 +102,10 @@ public:
     typedef ::Node< Graph<Trait> > Node;
     typedef ::Edge< Graph<Trait> > Edge;
 
-    typedef Node* NodePtr;
-    typedef Edge* EdgePtr;
-
-    typedef std::vector<Node*>  NodesVector;
-    typedef std::queue<Node*>   NodesQueue;
-    typedef std::stack<Node*>   NodesStack;
-    typedef std::vector<Edge*>    EdgesList;
+    typedef std::vector<Node*> NodesVector;
+    typedef std::queue<Node*> NodesQueue;
+    typedef std::stack<Node*> NodesStack;
+    typedef std::vector<Edge*> EdgesList;
 
     typedef typename Trait::NodeContent     NodeContent;
     typedef typename Trait::EdgeContent     EdgeContent;
@@ -122,13 +119,10 @@ private:
 
     auto find_node(NodeContent content);
     auto find_edge(Node* start, Node* end, EdgeContent content);
-public:
-    void clear();
 
+public:
     auto get_edgesVector();
-    NodesVector get_nodesVector(){
-        return nodes_vector;
-    }
+    auto get_nodesVector();
 
     bool is_directed();
     unsigned long size();
@@ -140,21 +134,29 @@ public:
     bool delete_node(NodeContent content);
     bool delete_edge(NodeContent start, NodeContent end, EdgeContent content);
 
-    auto bfs(NodeContent content);
-    auto dfs(NodeContent content);
+    void clear();
 
     void describe();
     void describe_helper(NodesVector to_describe);
 };
-class GNGTrait {
+
+class GNGTrait{
 public:
-    struct NodeContent {
-        int pos[2];
+    struct Node{
+        double pos[2];
         double error;
+        bool operator==(Node &content){
+            return pos[0] == content.pos[0] && pos[1] == content.pos[1] && error == content.error;
+        }
     };
+    typedef Node NodeContent;
+    typedef int EdgeContent;
+};
+class CustomTrait {
+public:
+    typedef std::string NodeContent;
     typedef int EdgeContent;
 };
 #include "graph.cpp"
 
 #endif //GRAPH_NULL_GRAPH_H
-

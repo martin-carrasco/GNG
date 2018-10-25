@@ -2,10 +2,11 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include "gng.h"
 
 
-#define SCREEN_HEIGHT 640
-#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 320
+#define SCREEN_WIDTH 320
 
 
 template<class GNGTrait>
@@ -35,10 +36,10 @@ auto GNGAlgorithm<GNGTrait>::find_max_error_connection(NodePtr node){
 }
 template<class GNGTrait>
 void GNGAlgorithm<GNGTrait>::init() {
-	iteracion = 0;
+	//iteracion = 0;
 	base_graph.clear();
-	int pos1[2];
-	int pos2[2];
+	double pos1[2];
+	double pos2[2];
 
 	//Creamos dos puntos al azar en el espacio de la pantalla
 	pos1[0] = rand() % SCREEN_HEIGHT;
@@ -47,8 +48,8 @@ void GNGAlgorithm<GNGTrait>::init() {
 	pos2[1] = rand() % SCREEN_WIDTH;
 
 	//Creamos los cotenidos basado en las posiciones e inicializamos los errores a 0
-	NodeContent c1 = {pos1, 0};
-	NodeContent c2 = {pos2, 0};
+	NodeContent c1 = {{pos1[0], pos1[1]}, 0};
+	NodeContent c2 = {{pos2[0], pos2[1]}, 0};
 
 	//Insertamos los nodos al grafo
 	base_graph.insert_node(c1);
@@ -108,9 +109,9 @@ void GNGAlgorithm<GNGTrait>::exec(sf::Vertex input){
 	//Esta posicion se calcula por una costante E_W multiplicado por el vector de diferencia entre
 	//Input y el menor nodo
 
-	int nueva_posicion[2] = {
-			(int) E_W *(input.position.x - smallestNodes[0]->getNode_content().pos[0]),
-			(int) E_W * (input.position.y - smallestNodes[0]->getNode_content().pos[1])
+	double nueva_posicion[2] = {
+			E_W *(input.position.x - smallestNodes[0]->getNode_content().pos[0]),
+			E_W * (input.position.y - smallestNodes[0]->getNode_content().pos[1])
 	};
 
 	//Actualizamos el valor del erro incrementantodolo por la distancia
@@ -133,9 +134,9 @@ void GNGAlgorithm<GNGTrait>::exec(sf::Vertex input){
 
 		//Movemos los nodos vecinos acercandose al input
 		//En el vector de diferencia entre el nodo vecino e input multiplicado por una constante E_N
-		int nueva_posicion_vecino[2] = {
-				(int) E_N * (input.position.x - node_destino->getNode_content().pos[0]),
-				(int) E_N * (input.position.y - node_destino->getNode_content().pos[1])
+		double nueva_posicion_vecino[2] = {
+				 E_N * (input.position.x - node_destino->getNode_content().pos[0]),
+				 E_N * (input.position.y - node_destino->getNode_content().pos[1])
 		};
 
 		NodeContent nc_vecino = {{nueva_posicion_vecino[0], nueva_posicion_vecino[1]},
@@ -178,7 +179,7 @@ void GNGAlgorithm<GNGTrait>::exec(sf::Vertex input){
 		NodeContent content_max = max_error_node->getNode_content();
 		NodeContent content_neighbor = max_error_neighbor->getNode_content();
 
-		int pos_modificada[2] = {
+		double pos_modificada[2] = {
 				content_max.pos[0] + content_neighbor.pos[0] / 2,
 				content_neighbor.pos[1] + content_max.pos[1] / 2
 		};
@@ -224,7 +225,8 @@ void GNGAlgorithm<GNGTrait>::exec(sf::Vertex input){
 
 template <class GNGTrait>
 InputGenerator<GNGTrait>::InputGenerator(sf::VertexArray vertexArray){
-        for(sf::Vertex v : vertexArray){
+        for(int x = 0;x < vertexArray.getVertexCount();x++){
+        	sf::Vertex v = vertexArray[x];
         	pos_vector.push_back(v);
         }
 }
@@ -240,7 +242,7 @@ unsigned long InputGenerator<GNGTrait>::size(){
 }
 template<class GNGTrait>
 void GNGContainer<GNGTrait>::draw_node(NodePtr node){
-	sf::CircleShape node_circle(1);
+	sf::CircleShape node_circle(5 , 30);
 	node_circle.setFillColor(sf::Color::Green);
 	node_circle.setPosition(node->getNode_content().pos[0], node->getNode_content().pos[1]);
 	nodes.push_back(node_circle);
@@ -257,17 +259,64 @@ void GNGContainer<GNGTrait>::draw_edge(NodePtr start, NodePtr end){
 }
 template<class GNGTrait>
 void GNGContainer<GNGTrait>::init(){
-	window = sf::Window(sf::VideoMode(SCREEN_HEIGHT, SCREEN_WIDTH), "Growing Neural Gas");
+	window.create(sf::VideoMode(SCREEN_HEIGHT, SCREEN_WIDTH), "Growing Neural Gas");
 	algo.init();
 }
 
 template<class GNGTrait>
 void GNGContainer<GNGTrait>::start() {
 
-	sf::VertexArray figure(sf::LinesStrip, 10000);
+	sf::VertexArray figure(sf::LinesStrip, 100);
 	//Ciclo de ejecucion del programa
 	while (window.isOpen()) {
 		sf::Event event;
+
+		//Ciclo de
+		if (is_running) {
+			InputGenerator<GNGTrait>inpt_gen = InputGenerator<GNGTrait>(figure);
+			while(inpt_gen.size() > 0 && algo.get_iteracion() < 100000){
+				sf::Vertex tmp = inpt_gen.pop();
+
+				algo.exec(tmp);
+
+				Graph<GNGTrait> g = algo.get_graph();
+
+				for(NodePtr node_ptr : g.get_nodesVector()){
+					sf::CircleShape node_circle(5 , 30);
+					node_circle.setFillColor(sf::Color::Green);
+					node_circle.setPosition(node_ptr->getNode_content().pos[0], node_ptr->getNode_content().pos[1]);
+					//nodes.push_back(node_circle);
+
+					window.draw(node_circle);
+
+					for(EdgePtr edge_ptr : node_ptr->getEdges_list()){
+						NodePtr node_dest_ptr = edge_ptr->getDest(node_ptr);
+
+						sf::Vector2f start_v(node_ptr->getNode_content().pos[0], node_ptr->getNode_content().pos[1]);
+						sf::Vector2f end_v(node_dest_ptr->getNode_content().pos[0], node_dest_ptr->getNode_content().pos[1]);
+						sf::Vertex edge[] = {
+								sf::Vertex(start_v, sf::Color::Red),
+								sf::Vertex(end_v, sf::Color::Red)
+						};
+						window.draw(edge, 2, sf::LinesStrip);
+						//draw_edge(node_ptr, edge_ptr->getDest(node_ptr));
+
+						sf::CircleShape node_circle_dest(5 , 30);
+						node_circle_dest.setFillColor(sf::Color::Green);
+						node_circle_dest.setPosition(node_dest_ptr->getNode_content().pos[0], node_dest_ptr->getNode_content().pos[1]);
+						window.draw(node_circle_dest);
+					}
+				}
+
+				/*for (sf::CircleShape n : nodes) {
+					window.draw(n);
+				}
+				for (sf::Vertex* vertexPtr : edges) {
+					window.draw(vertexPtr, 2, sf::LinesStrip);
+				}*/
+				window.display();
+			}
+		}
 
 		//Ciclo de eventos
 		while (window.pollEvent(event)) {
@@ -289,7 +338,10 @@ void GNGContainer<GNGTrait>::start() {
 
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-				is_running = !is_running;
+				if(is_running)
+					is_running = false;
+				else if(!is_running)
+					is_running = true;
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
 				if(is_running)
@@ -315,31 +367,6 @@ void GNGContainer<GNGTrait>::start() {
 		//nodes.push_back(draw_node(x, y)); Añadir un node a la cola de dibujo
 		//edges.push_back(draw_edge(x, y)); Añadir un edge a la cola de dibujo
 
-		if (is_running) {
-			inpt_gen = InputGenerator<GNGTrait>(figure);
-			while(inpt_gen.size() > 0 && algo.get_iteracion() < 1000){
-				sf::Vertex tmp = inpt_gen.pop();
-
-				algo.exec(tmp);
-
-				Graph<GNGTrait> g = algo.get_graph();
-
-				for(NodePtr node_ptr : g.get_nodesVector()){
-					draw_node(node_ptr);
-					for(EdgePtr edge_ptr : node_ptr->getEdges_list()){
-						draw_edge(node_ptr, edge_ptr->getDest(node_ptr));
-						draw_node(edge_ptr->getDest(node_ptr));
-					}
-				}
-
-				for (sf::CircleShape n : nodes) {
-					window.draw(n);
-				}
-				for (sf::Vertex* vertexPtr : edges) {
-					window.draw(vertexPtr, 2, sf::LinesStrip);
-				}
-			}
-		}
 
 		window.display();
 	}

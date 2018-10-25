@@ -15,9 +15,10 @@ class InputGenerator;
 
 template <class GNGTrait>
 class GNGAlgorithm{
-    typedef typename GNGTrait::NodeContent NodeContent;
-    typedef typename Graph<GNGTrait>::EdgePtr EdgePtr;
-    typedef typename Graph<GNGTrait>::NodePtr NodePtr;
+private:
+    typedef typename Graph<GNGTrait>::NodeContent NodeContent;
+    typedef ::Edge<Graph<GNGTrait>>* EdgePtr;
+    typedef ::Node<Graph<GNGTrait>>* NodePtr;
 
     static constexpr int SIGMA = 300; //Mean error (Medida de error maxima aceptable)
     static constexpr double ALFA = 0.5;
@@ -27,7 +28,7 @@ class GNGAlgorithm{
     static constexpr double MAX_AGE = 1000; //TODO Cambiar ???
     static constexpr int MAX_NODES = 100; //TODO cambiar ???
 
-    unsigned int iteracion = 0;
+    unsigned int iteracion = 1;
     Graph<GNGTrait> base_graph;
     //Find the node with the highest error in the graph
     auto find_max_error(Graph<GNGTrait> &graph);
@@ -35,6 +36,7 @@ class GNGAlgorithm{
     auto find_max_error_connection(NodePtr node);
 
 public:
+    GNGAlgorithm() = default;
     void init();
     bool hay_coneccion(NodePtr node1, NodePtr node2);
     double calcular_distancia(NodePtr node, sf::Vertex input);
@@ -50,22 +52,19 @@ public:
 
 template <class GNGTrait>
 class InputGenerator{
-    typedef typename Node<Graph<GNGTrait>>::Node Node;
-    typedef Node* NodePtr;
+    typedef ::Node<Graph<GNGTrait>>* NodePtr;
     //Vectores de input que conforman la imagen
     vector<sf::Vertex> pos_vector;
 
 public:
-    InputGenerator(sf::VertexArray vertexArray);
+    explicit InputGenerator(sf::VertexArray vertexArray);
     sf::Vertex pop();
     unsigned long size();
 };
 template<class GNGTrait>
 class GNGContainer{
-    typedef typename GNGAlgorithm<GNGTrait>::NodePtr NodePtr;
-    typedef typename GNGAlgorithm<GNGTrait>::EdgePtr EdgePtr;
-
-    InputGenerator<GNGTrait> inpt_gen;
+    typedef ::Node<Graph<GNGTrait>>* NodePtr;
+    typedef ::Edge<Graph<GNGTrait>>* EdgePtr;
     GNGAlgorithm<GNGTrait> algo;
     //Ventana del GNG
     sf::RenderWindow window;
@@ -83,12 +82,12 @@ class GNGContainer{
     bool is_drawing = false;
 
     //Variable de pause
-    bool is_running = true;
+    bool is_running = false;
     void draw_node(NodePtr node);
     void draw_edge(NodePtr start_node, NodePtr end_node);
 
 public:
-    GNGContainer(){};
+    GNGContainer() = default;
     void init();
     void start();
 };

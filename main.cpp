@@ -9,9 +9,6 @@
 #include "GNG/gng.h"
 #include "SFML/Graphics.hpp"
 
-#define SCREEN_WIDTH 720
-#define SCREEN_HEIGHT 980
-
 using namespace std;
 
 
