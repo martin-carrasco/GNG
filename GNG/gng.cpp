@@ -9,7 +9,7 @@
 
 
 template<class GNGTrait>
-Node<Graph<GNGTrait>>* GNGAlgorithm<GNGTrait>::find_max_error(Graph<GNGTrait> &graph){
+auto GNGAlgorithm<GNGTrait>::find_max_error(Graph<GNGTrait> &graph){
 	NodePtr max_node = nullptr;
 	for(NodePtr node : graph.get_nodesVector()){
 		if(max_node == nullptr)
@@ -22,7 +22,7 @@ Node<Graph<GNGTrait>>* GNGAlgorithm<GNGTrait>::find_max_error(Graph<GNGTrait> &g
 }
 //Finds the neighbor of node with the highest error value
 template<class GNGTrait>
-Node<Graph<GNGTrait>>* GNGAlgorithm<GNGTrait>::find_max_error_connection(NodePtr node){
+auto GNGAlgorithm<GNGTrait>::find_max_error_connection(NodePtr node){
 	NodePtr max_node = nullptr;
 	for(EdgePtr e : node->getEdges_list()) {
 		if (max_node == nullptr)

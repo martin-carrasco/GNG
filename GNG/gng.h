@@ -15,9 +15,9 @@ class InputGenerator;
 
 template <class GNGTrait>
 class GNGAlgorithm{
-    typedef typename Graph<GNGTrait>::NodeContent NodeContent;
-    typedef typename Graph<GNGTrait>::Edge* EdgePtr;
-    typedef typename Graph<GNGTrait>::Node* NodePtr;
+    typedef typename GNGTrait::NodeContent NodeContent;
+    typedef typename Graph<GNGTrait>::EdgePtr EdgePtr;
+    typedef typename Graph<GNGTrait>::NodePtr NodePtr;
 
     static constexpr int SIGMA = 300; //Mean error (Medida de error maxima aceptable)
     static constexpr double ALFA = 0.5;
@@ -30,9 +30,9 @@ class GNGAlgorithm{
     unsigned int iteracion = 0;
     Graph<GNGTrait> base_graph;
     //Find the node with the highest error in the graph
-    Node<Graph<GNGTrait>>* find_max_error(Graph<GNGTrait> &graph);
+    auto find_max_error(Graph<GNGTrait> &graph);
     //Finds the neighbor of node with the highest error value
-    Node<Graph<GNGTrait>>* find_max_error_connection(NodePtr node);
+    auto find_max_error_connection(NodePtr node);
 
 public:
     void init();
@@ -42,7 +42,7 @@ public:
     int get_iteracion(){
         return iteracion;
     }
-    Graph<GNGTrait> get_graph(){
+    auto get_graph(){
         return base_graph;
     }
 
@@ -50,7 +50,7 @@ public:
 
 template <class GNGTrait>
 class InputGenerator{
-    typedef typename Graph<GNGTrait>::Node Node;
+    typedef typename Node<Graph<GNGTrait>>::Node Node;
     typedef Node* NodePtr;
     //Vectores de input que conforman la imagen
     vector<sf::Vertex> pos_vector;
@@ -62,11 +62,8 @@ public:
 };
 template<class GNGTrait>
 class GNGContainer{
-    typedef typename Graph<GNGTrait>::Node Node;
-    typedef typename Graph<GNGTrait>::Edge Edge;
-    typedef Node* NodePtr;
-    typedef Edge* EdgePtr;
-
+    typedef typename GNGAlgorithm<GNGTrait>::NodePtr NodePtr;
+    typedef typename GNGAlgorithm<GNGTrait>::EdgePtr EdgePtr;
 
     InputGenerator<GNGTrait> inpt_gen;
     GNGAlgorithm<GNGTrait> algo;

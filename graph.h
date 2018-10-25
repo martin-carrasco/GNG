@@ -143,16 +143,8 @@ public:
     auto bfs(NodeContent content);
     auto dfs(NodeContent content);
 
-    // NodesVector dijkstra(NodeContent start);
-
     void describe();
     void describe_helper(NodesVector to_describe);
-};
-
-class CustomTrait {
-public:
-    typedef std::string NodeContent;
-    typedef int EdgeContent;
 };
 class GNGTrait {
 public:
