@@ -13,9 +13,9 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-    GNGContainer<GNGTrait> container;
-    container.init();
-    container.start();
+    	GNGContainer<UGNGTrait> container;
+    	container.init();
+    	container.start();
 
 	return 0;
 }

@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <map>
+#include <stdexcept>
 
 template <class GraphTrait>
 class Node {
@@ -25,23 +26,31 @@ private:
 public:
     Node () = default;
 
-    EdgesList getEdges_list() const {
+    EdgesList getEdges() const {
         return edges_list;
     }
 
-    void setEdges_list(EdgesList edges_list) {
+    void setEdges(EdgesList edges_list) {
         Node::edges_list = edges_list;
     }
 
     void addEdge(Edge * edge) {
         this->edges_list.push_back(edge);
     }
+    void removeEdge(Edge* edge){
+	auto it = find(edges_list.begin(), edges_list.end(), edge);
+	if(it != edges_list.end()){	
+		edges_list.erase(it);
+		return;
+	}
+	throw std::invalid_argument("Edge not found");
+    }
 
-    NodeContent getNode_content() const {
+    NodeContent getContent() const {
         return node_content;
     }
 
-    void setNode_content(NodeContent node_content) {
+    void setContent(NodeContent node_content) {
         Node::node_content = node_content;
     }
 };
@@ -59,19 +68,19 @@ private:
 public:
     Edge () = default;
 
-    bool isIs_directed() const {
+    bool isDirected() const {
         return is_directed;
     }
 
-    void setIs_directed(bool is_directed) {
+    void setDirected(bool is_directed) {
         Edge::is_directed = is_directed;
     }
 
-    EdgeContent getEdge_content() const {
+    EdgeContent getContent() const {
         return edge_content;
     }
 
-    void setEdge_content(EdgeContent edge_content) {
+    void setContent(EdgeContent edge_content) {
         Edge::edge_content = edge_content;
     }
 
@@ -117,27 +126,27 @@ private:
     NodesIterator nodes_iterator;
     EdgesIterator edges_iterator;
 
-    auto find_node(NodeContent content);
-    auto find_edge(Node* start, Node* end, EdgeContent content);
+    auto findNode(NodeContent content);
+    auto findEdge(Node* start, Node* end, EdgeContent content);
 
 public:
-    auto get_edgesVector();
-    auto get_nodesVector();
+    auto getEdgesVector();
+    auto getNodesVector();
 
-    bool is_directed();
+    bool isDirected();
     unsigned long size();
     unsigned long num_edges();
 
-    bool insert_node(NodeContent node_content);
-    void insert_edge(EdgeContent edge_content, NodeContent start, NodeContent end, bool is_directed);
+    bool insertNode(NodeContent node_content);
+    void insertEdge(EdgeContent edge_content, NodeContent start, NodeContent end, bool is_directed);
 
-    bool delete_node(NodeContent content);
-    bool delete_edge(NodeContent start, NodeContent end, EdgeContent content);
+    void deleteNode(NodeContent content);
+    void deleteEdge(NodeContent start, NodeContent end, EdgeContent content);
 
     void clear();
 
     void describe();
-    void describe_helper(NodesVector to_describe);
+    void describeHelper(NodesVector to_describe);
 };
 
 class GNGTrait{
@@ -151,6 +160,19 @@ public:
     };
     typedef Node NodeContent;
     typedef int EdgeContent;
+};
+class UGNGTrait{
+public:
+	struct Node{
+		double pos[2];
+		double error;
+		double U;
+		bool operator==(Node &content){
+		    return pos[0] == content.pos[0] && pos[1] == content.pos[1] && error == content.error;
+		}
+	};
+	typedef Node NodeContent;
+	typedef int EdgeContent;
 };
 class CustomTrait {
 public:

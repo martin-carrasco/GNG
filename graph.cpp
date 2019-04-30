@@ -1,11 +1,12 @@
 #include <iostream>
+#include <stdexcept>
 using namespace std;
 
 template <class CustomTrait>
-auto Graph<CustomTrait>::get_edgesVector() {
+auto Graph<CustomTrait>::getEdgesVector() {
     vector<Edge*> visited;
     for(Node* node : nodes_vector){
-        for(Edge* e : node->getEdges_list())
+        for(Edge* e : node->getEdges())
             if(find(visited.begin() ,visited.end() ,e) == visited.end())
                 visited.push_back(e);
     }
@@ -18,26 +19,23 @@ unsigned long Graph<CustomTrait>::size(){
 }
 
 template <class CustomTrait>
-auto Graph<CustomTrait>::find_edge(Node* start, Node* end, EdgeContent content){
-    for(Edge* e : start->getEdges_list()){
-        if(e->getEdge_content() == content &&
-           e->getVertices()[0] == start &&
-           e->getVertices()[1] == end)
-
-            return e;
+auto Graph<CustomTrait>::findEdge(Node* start, Node* end, EdgeContent content){
+    for(Edge* e : start->getEdges()){
+	    if(e->getDest(start) == end && e->getContent() == content)
+		    return  e;
     }
     return (Edge*) nullptr;
 }
 template <class CustomTrait>
 void Graph<CustomTrait>::clear(){
     for(Node* n : nodes_vector){
-        delete_node(n->getNode_content());
+        deleteNode(n->getContent());
     }
 }
 template <class CustomTrait>
-auto Graph<CustomTrait>::find_node(NodeContent content){
+auto Graph<CustomTrait>::findNode(NodeContent content){
     for(auto it = nodes_vector.begin(); it != nodes_vector.end();it++){
-        if((*it)->getNode_content() == content)
+        if((*it)->getContent() == content)
             return *it;
     }
 
@@ -45,56 +43,45 @@ auto Graph<CustomTrait>::find_node(NodeContent content){
 }
 
 template <class CustomTrait>
-bool Graph<CustomTrait>::insert_node(NodeContent node_content){
+bool Graph<CustomTrait>::insertNode(NodeContent node_content){
     Node *node = new Node();
-    node->setNode_content(node_content);
+    node->setContent(node_content);
     nodes_vector.push_back(node);
     return true;
 }
 template <class CustomTrait>
-void Graph<CustomTrait>::insert_edge(EdgeContent edge_content, NodeContent start, NodeContent end, bool is_directed) {
-    if (start == end) {
-        return;
-    }
+void Graph<CustomTrait>::insertEdge(EdgeContent edge_content, NodeContent start, NodeContent end, bool is_directed) {
+    if (start == end)
+	    throw invalid_argument("Start edge same as End edge");
 
     Edge *edge = new Edge();
-    Node * a = find_node(start);
-    Node * b = find_node(end);
+    Node * a = findNode(start);
+    Node * b = findNode(end);
 
     if (a == nullptr || b == nullptr)
-        return;
+        throw invalid_argument("Some node didnt exist");
 
     edge->setVertices(a, b);
-    edge->setEdge_content(edge_content);
-    edge->setIs_directed(is_directed);
+    edge->setContent(edge_content);
+    edge->setDirected(is_directed);
 
     a->addEdge(edge);
     b->addEdge(edge);
 }
 
 template<class CustomTrait>
-bool Graph<CustomTrait>::delete_node(NodeContent content){
-    Node* node = find_node(content);
+void Graph<CustomTrait>::deleteNode(NodeContent content){
+    Node* node = findNode(content);
 
     if(node == nullptr)
-        return false;
+        throw invalid_argument("Node did not exist");
 
 
-    EdgesList tmpEdgeList = node->getEdges_list();
+    EdgesList tmpEdgeList = node->getEdges();
 
-    //Iteramos en la lista de aristas que estan relacionadas al nodo que buscamos borrar
-    //LLamamos a la funcion delete_edge con el nodo relacionado y aseguramos que se borre adecuadamente
+    //Iteramos alrededor de todas las aristas del nodo y procedemos a eliminarlas
     for(auto it = tmpEdgeList.begin();it != tmpEdgeList.end();it++){
-
-        Edge* tmp_edge = *it;
-        if(tmp_edge->getVertices()[0] == node || tmp_edge->getVertices()[1] == node) {
-            NodeContent content_end = tmp_edge->getVertices()[1] == node
-                                      ? tmp_edge->getVertices()[0]->getNode_content()
-                                      : content; //Determina el nodo opuesto
-
-            delete_edge(content_end, content, tmp_edge->getEdge_content());
-        }
-
+	deleteEdge(content, (*it)->getDest(node)->getContent(), (*it)->getContent());
     }
 
     //Finalmente hacemos una iteracion en la el vector de nodos, lo borramos de ahi
@@ -107,62 +94,31 @@ bool Graph<CustomTrait>::delete_node(NodeContent content){
     delete node;
 }
 template <class CustomTrait>
-bool Graph<CustomTrait>::delete_edge(NodeContent start, NodeContent end, EdgeContent content) {
-    Node* start_node = find_node(start);
-    Node* end_node = find_node(end);
+void Graph<CustomTrait>::deleteEdge(NodeContent start, NodeContent end, EdgeContent content) {
+    Node* start_node = findNode(start);
+    Node* end_node = findNode(end);
 
     if(start_node == nullptr || end_node == nullptr)
-        return false;
+        throw invalid_argument("One node content did not exist");
 
-    Edge* edge = find_edge(start_node, end_node, content);
+    Edge* edge = findEdge(start_node, end_node, content);
 
     if(edge == nullptr)
-        return false;
+        throw invalid_argument("Edge between the nodes did not exist");
 
 
-    EdgesList tmpEdgeListStart = start_node->getEdges_list();
-    EdgesList tmpEdgeListEnd = end_node->getEdges_list();
-    Edge* to_be_delted = nullptr;
+    start_node->removeEdge(edge);
+    end_node->removeEdge(edge);
 
-    //Iteramos a lo largo de las dos listas de edges y al encontrarlo
-    //lo añadimos a un vector temporal que despues reemplazaremos por el vector
-    //contenido en cada Node
-    //Finalmente guardamos el puntero a Edge para poder liberar su memoria
-
-    for(edges_iterator = tmpEdgeListStart.begin();
-        edges_iterator != tmpEdgeListStart.end();edges_iterator++){
-        Edge* tmp_edge = *edges_iterator;
-        if(tmp_edge == edge) {
-            to_be_delted = tmp_edge;
-            tmpEdgeListStart.erase(edges_iterator);
-            break;
-        }
-    }
-
-    for(edges_iterator = tmpEdgeListEnd.begin();
-        edges_iterator != tmpEdgeListEnd.end();edges_iterator++){
-        Edge* tmp_edge = *edges_iterator;
-        if(tmp_edge == edge) {
-            assert(tmp_edge == to_be_delted);
-            tmpEdgeListEnd.erase(edges_iterator);
-            break;
-        }
-    }
-
-    start_node->setEdges_list(tmpEdgeListStart);
-    end_node->setEdges_list(tmpEdgeListEnd);
-
-    delete to_be_delted;
-
-    return true;
+    //delete edge;
 }
 
 template <class CustomTrait>
-bool Graph<CustomTrait>::is_directed() {
+bool Graph<CustomTrait>::isDirected() {
     for(nodes_iterator = nodes_vector.begin();nodes_iterator != nodes_vector.end();nodes_iterator++){
         Node* current = *nodes_iterator;
-        for(Edge* e : current->getEdges_list()){
-            if(e->isIs_directed())
+        for(Edge* e : current->getEdges()){
+            if(e->isDirected())
                 return true;
         }
     }
@@ -173,31 +129,31 @@ bool Graph<CustomTrait>::is_directed() {
 template <class CustomTrait>
 void Graph<CustomTrait>::describe() {
     for(auto node : nodes_vector){
-        std::cout << "Node " << node->getNode_content() << " -> ";
-        for(auto e : node->getEdges_list()){
+        std::cout << "Node " << node->getContent() << " -> ";
+        for(auto e : node->getEdges()){
             Node* dest = e->getDest(node);
             if(dest == nullptr)
                 continue;
-            cout << "Node " << dest->getNode_content() << " ";
+            cout << "Node " << dest->getContent() << " ";
         }
         std::cout << std::endl;
     }
 }
 template <class CustomTrait>
-void Graph<CustomTrait>::describe_helper(NodesVector to_describe){
+void Graph<CustomTrait>::describeHelper(NodesVector to_describe){
     for(auto node : to_describe){
-        std::cout << "Node " << node->getNode_content() << " -> ";
-        for(auto e : node->getEdges_list()){
+        std::cout << "Node " << node->getContent() << " -> ";
+        for(auto e : node->getEdges()){
             Node* dest = e->getDest(node);
             if(dest == nullptr)
                 continue;
-            cout << "Node " << dest->getNode_content() << " ";
+            cout << "Node " << dest->getContent() << " ";
         }
         std::cout << std::endl;
     }
 }
 
 template <class CustomTrait>
-auto Graph<CustomTrait>::get_nodesVector(){
+auto Graph<CustomTrait>::getNodesVector(){
     return nodes_vector;
 }
