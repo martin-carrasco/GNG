@@ -1,3 +1,0 @@
-/home/martin/CLionProjects/graph-null/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/martin/CLionProjects/graph-null/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/martin/CLionProjects/graph-null/cmake-build-debug/CMakeFiles/graph-null.dir

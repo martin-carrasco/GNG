@@ -1,1 +1,0 @@
-/usr/bin/c++  -g  -rdynamic CMakeFiles/graph-null.dir/main.cpp.o CMakeFiles/graph-null.dir/GNG/gng.cpp.o  -o graph-null 

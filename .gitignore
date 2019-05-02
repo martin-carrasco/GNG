@@ -5,4 +5,7 @@
 *.o
 *.ini
 *.swp
+*.swo
 *.txt
+*~
+
