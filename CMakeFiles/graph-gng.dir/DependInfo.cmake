@@ -4,8 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/martin/CLionProjects/graph-null/GNG/gng.cpp" "/home/martin/CLionProjects/graph-null/cmake-build-debug/CMakeFiles/graph-null.dir/GNG/gng.cpp.o"
-  "/home/martin/CLionProjects/graph-null/main.cpp" "/home/martin/CLionProjects/graph-null/cmake-build-debug/CMakeFiles/graph-null.dir/main.cpp.o"
+  "/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/main.cpp" "/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/CMakeFiles/graph-gng.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

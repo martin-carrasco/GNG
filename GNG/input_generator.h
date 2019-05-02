@@ -5,10 +5,10 @@
 
 using namespace std;
 
-template <class GNGTrait>
+template <class Trait>
 class InputGenerator{
 protected:
-    typedef ::Node<Graph<GNGTrait>>* NodePtr;
+    typedef ::Node<Graph<Trait>>* NodePtr;
     //Vectores de input que conforman la imagen
     vector<sf::Vertex> pos_vector;
 public:
@@ -18,20 +18,20 @@ public:
 
 };
 
-template <class GNGTrait>
-class UniformDistributionInputGenerator : public InputGenerator<GNGTrait>{
+template <class Trait>
+class UniformDistributionInputGenerator : public InputGenerator<Trait>{
 private:
 	default_random_engine re;
 	uniform_int_distribution<int> dist;
 public:
-	UniformDistributionInputGenerator(vector<sf::VertexArray> vec) : InputGenerator<GNGTrait>(vec) {}
+	UniformDistributionInputGenerator(vector<sf::VertexArray> vec) : InputGenerator<Trait>(vec) {}
 	sf::Vertex pop();
 };
 
-template <class GNGTrait>
-class DefaultInputGenerator : public InputGenerator<GNGTrait>{
+template <class Trait>
+class DefaultInputGenerator : public InputGenerator<Trait>{
 public:
-	DefaultInputGenerator(vector<sf::VertexArray> vec) : InputGenerator<GNGTrait>(vec) {}
+	DefaultInputGenerator(vector<sf::VertexArray> vec) : InputGenerator<Trait>(vec) {}
 	sf::Vertex pop();
 };
 

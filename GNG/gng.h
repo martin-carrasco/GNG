@@ -11,12 +11,16 @@
 #include <random>
 #include <functional>
 
+#define SCREEN_HEIGHT 640
+#define SCREEN_WIDTH 640
 
-template<class GNGTrait>
-class GNGContainer{
-    typedef ::Node<Graph<GNGTrait>>* NodePtr;
-    typedef ::Edge<Graph<GNGTrait>>* EdgePtr;
-    GNGAlgorithm<GNGTrait> algo;
+
+template<class Trait>
+class GNGContainer {
+protected:
+    typedef ::Node<Graph<Trait>>* NodePtr;
+    typedef ::Edge<Graph<Trait>>* EdgePtr;
+    GNGAlgorithm<Trait> algo;
     //Ventana del GNG
     sf::RenderWindow window;
 
@@ -29,10 +33,19 @@ class GNGContainer{
     //Variable de pause
     bool is_running = false;
 public:
-    GNGContainer() = default;
-    void init();
-    void start();
-    void start_moving();
+    GNGContainer() :  algo(SCREEN_HEIGHT, SCREEN_WIDTH) {}
+    virtual void init();
+    virtual void start();
+};
+template<class Trait>
+class PictureGNGContainer : public GNGContainer<Trait> {
+    typedef ::Node<Graph<Trait>>* NodePtr;
+    typedef ::Edge<Graph<Trait>>* EdgePtr;
+    vector<pair<int, int>> pic_vector; 
+public:
+    PictureGNGContainer() = default;
+    virtual void init();
+    virtual void start();
 };
 
 #include "gng.cpp"

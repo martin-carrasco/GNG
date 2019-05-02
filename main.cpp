@@ -13,9 +13,16 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
-    	GNGContainer<UGNGTrait> container;
-    	container.init();
-    	container.start();
+    	int mode = atoi(argv[1]);
+        if(mode == 0){
+            GNGContainer<GNGTrait> container;
+            container.init();
+            container.start();
+        }else{
+            PictureGNGContainer<GNGTrait> container;
+            container.init();
+            container.start();
+        }
 
 	return 0;
 }
