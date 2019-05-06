@@ -40,13 +40,15 @@ public:
     bool isConnected(NodePtr node1, NodePtr node2);
     double getDistance(NodePtr node, sf::Vertex input);
     int get_iteracion();
-    auto get_graph();
+    auto get_graph(){
+        return base_graph;
+    }
     virtual void exec(sf::Vertex input); 
     virtual void init();
 };
 
 template <class Trait>
-class DefaultGNGAlgorithm{
+class DefaultGNGAlgorithm : public GNGAlgorithm<Trait> {
     typedef typename Graph<Trait>::NodeContent NodeContent;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
     typedef ::Node<Graph<Trait>>* NodePtr;
@@ -61,7 +63,7 @@ public:
 };
 
 template <class Trait>
-class UGNGAlgorithm{ 
+class UGNGAlgorithm : public GNGAlgorithm<Trait> { 
     typedef typename Graph<Trait>::NodeContent NodeContent;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
     typedef ::Node<Graph<Trait>>* NodePtr;

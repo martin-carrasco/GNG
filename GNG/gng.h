@@ -14,11 +14,11 @@
 #define SCREEN_HEIGHT 640
 #define SCREEN_WIDTH 640
 
-template <class Trait, class Algorithm>
+template <template <class> class Algorithm, class Trait>
 class GNGContainer {
 protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
-    typedef ::Node<Graph<Trait>>* EdgePtr;
+    typedef ::Edge<Graph<Trait>>* EdgePtr;
 
     void drawNode(int x, int y);
     void drawEdge(EdgePtr edge_ptr, NodePtr node_ptr);
@@ -35,25 +35,26 @@ public:
     virtual void start() = 0;
 };
 
-template<class Trait, class Algorithm>
-class DefaultGNGContainer {
-protected:
-    typedef ::Node<Graph<Trait>>* NodePtr;
-    typedef ::Edge<Graph<Trait>>* EdgePtr;
+template<template <class> class Algorithm, class Trait>
+class DefaultGNGContainer : public GNGContainer<Algorithm, Trait> {
+    friend class GNGContainer<Algorithm, Trait>;
+    typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
+    typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
 public:
-    DefaultGNGContainer() :  GNGContainer<Trait, Algorithm>() {}
+    DefaultGNGContainer() :  GNGContainer<Algorithm, Trait>() {}
     virtual void init();
     virtual void start();
 };
 
-template<class Trait, class Algorithm>
-class PictureGNGContainer{
-    typedef ::Node<Graph<Trait>>* NodePtr;
-    typedef ::Edge<Graph<Trait>>* EdgePtr;
+template<template <class> class Algorithm, class Trait>
+class PictureGNGContainer : public GNGContainer<Algorithm, Trait> {
+    friend class GNGContainer<Algorithm, Trait>;
+    typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
+    typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
 
     vector<pair<int, int>> pic_vector; 
 public:
-    PictureGNGContainer() : GNGContainer<Trait, Algorithm>(){}
+    PictureGNGContainer() : GNGContainer<Algorithm, Trait>(){}
     virtual void init();
     virtual void start();
 };
