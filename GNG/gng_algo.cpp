@@ -1,6 +1,5 @@
 #include "gng_algo.h"
 
-//Finds the node with the max error
 template<class Trait>
 auto GNGAlgorithm<Trait>::findMaxError(Graph<Trait> &graph){
 	NodePtr max_node = nullptr;
@@ -13,14 +12,12 @@ auto GNGAlgorithm<Trait>::findMaxError(Graph<Trait> &graph){
 	}
 	return max_node;
 }
-//Finds the Euclidean distance between coordinates from a Node and an Input
 template<class Trait>
 double GNGAlgorithm<Trait>::getDistance(NodePtr node, sf::Vertex input){
 	return 
 			pow(node->getContent().pos[0] - input.position.x, 2) +
 			pow(node->getContent().pos[1] - input.position.y, 2);
 }
-//Finds the neighbor of node with the highest error value
 template<class Trait>
 auto GNGAlgorithm<Trait>::findMaxErrorLink(NodePtr node){
 	NodePtr max_node = nullptr;
@@ -145,8 +142,9 @@ void GNGAlgorithm<Trait>::exec(sf::Vertex input){
 	
     //cout << this->SIGMA << " " << this->iteracion << endl << endl;	
 	if(this->iteracion % this->SIGMA == 0 && this->base_graph.size() < this->MAX_NODES) {
-		NodePtr max_error_node = findMaxError(this->base_graph);
-		NodePtr max_error_neighbor = findMaxErrorLink(max_error_node);
+		NodePtr max_error_node = this->findMaxError(this->base_graph);
+		NodePtr max_error_neighbor = this->findMaxErrorLink(max_error_node);
+
 
 		assert(max_error_neighbor != nullptr);
 			
@@ -239,7 +237,7 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 
 	//Actualizamos el valor del erro incrementantodolo por la distancia
 	//y insertamos la nueva posicion del nodo
-	double n_erro = smallestNodes[0]->getContent().error + getDistance(smallestNodes[0], input);
+	double n_erro = smallestNodes[0]->getContent().error + this->getDistance(smallestNodes[0], input);
 	NodeContent c1 = {{nueva_posicion[0], nueva_posicion[1]},
 				   n_erro,
        				smallestNodes[1]->getContent().error - n_erro
@@ -285,8 +283,8 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 		this->base_graph.insertEdge(0, smallestNodes[0]->getContent(), smallestNodes[1]->getContent(), false);
 
 	//Busca el numero con la menor utilidad y divide el mayor error entre esta
-	NodeContent min_utility_content = findMinUtility(this->base_graph)->getContent();
-	NodeContent tmp_max_error = findMaxError(this->base_graph)->getContent();
+	NodeContent min_utility_content = this->findMinUtility(this->base_graph)->getContent();
+	NodeContent tmp_max_error = this->findMaxError(this->base_graph)->getContent();
 	
 
 	if((tmp_max_error.error / min_utility_content.U) > this->K){	
@@ -296,8 +294,8 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	
         //cout << this->SIGMA << " " << this->iteracion << endl << endl;	
 	if(this->iteracion % this->SIGMA == 0 && this->base_graph.size() < this->MAX_NODES) {
-		NodePtr max_error_node = findMaxError(this->base_graph);
-		NodePtr max_error_neighbor = findMaxErrorLink(max_error_node);
+		NodePtr max_error_node = this->findMaxError(this->base_graph);
+		NodePtr max_error_neighbor = this->findMaxErrorLink(max_error_node);
 		
 		if(max_error_neighbor == nullptr)
 			return;
@@ -388,6 +386,7 @@ bool GNGAlgorithm<Trait>::isConnected(NodePtr node1, NodePtr node2){
 	}
 	return false;
 }
+
 template<class Trait>
 auto UGNGAlgorithm<Trait>::findMinUtility(Graph<Trait> &graph){
 	NodePtr min_node = nullptr;
@@ -400,4 +399,3 @@ auto UGNGAlgorithm<Trait>::findMinUtility(Graph<Trait> &graph){
 	}
 	return min_node;
 }
-

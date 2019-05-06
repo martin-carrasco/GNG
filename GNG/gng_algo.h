@@ -6,8 +6,8 @@
 #include <cmath>
 
 template <class Trait>
-class GNGAlgorithm{
-	protected:
+class GNGAlgorithm {
+protected:
     typedef typename Graph<Trait>::NodeContent NodeContent;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
     typedef ::Node<Graph<Trait>>* NodePtr;
@@ -22,46 +22,57 @@ class GNGAlgorithm{
     static constexpr int MAX_NODES = 100; //TODO cambiar ???
 
 
-	unsigned int SCREEN_HEIGHT;
-	unsigned int SCREEN_WIDTH;
-    
-	unsigned int iteracion = 1;
-    Graph<Trait> base_graph;
+    unsigned int SCREEN_HEIGHT;
+    unsigned int SCREEN_WIDTH;
 
-   //Find the node with the highest error in the graph
-    auto findMaxError(Graph<Trait> &graph);
-    
-    //Finds the neighbor of node with the highest error value
+    unsigned int iteracion = 1;
+
+    Graph<Trait> base_graph; 
+   
+    //Finds the node with the max error
+    auto findMaxError(Graph<Trait> &graph); 
+
+    //Finds the neighbor with the max error of said node
     auto findMaxErrorLink(NodePtr node);
 
-	public:
-    GNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : SCREEN_HEIGHT(screen_height), SCREEN_WIDTH(screen_width){}
-    virtual void init();
+public:
+    GNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : SCREEN_HEIGHT(screen_height), SCREEN_WIDTH(screen_width) {}
     bool isConnected(NodePtr node1, NodePtr node2);
     double getDistance(NodePtr node, sf::Vertex input);
-	virtual void exec(sf::Vertex input);
-    int get_iteracion(){
-        return iteracion;
-    }
-    auto get_graph(){
-        return base_graph;
-    }
-
+    int get_iteracion();
+    auto get_graph();
+    virtual void exec(sf::Vertex input); 
+    virtual void init();
 };
 
 template <class Trait>
-class UGNGAlgorithm : public  GNGAlgorithm<Trait> {
-	private:	
+class DefaultGNGAlgorithm{
     typedef typename Graph<Trait>::NodeContent NodeContent;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
     typedef ::Node<Graph<Trait>>* NodePtr;
 
-		 //Encuentra el nodo con la minima utilidad
-		auto findMinUtility(Graph<Trait> &graph);
-	public:
-		UGNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : GNGAlgorithm<Trait>(screen_height, screen_width){}
-		virtual void init();
-		virtual void exec(sf::Vertex);
+public:
+    DefaultGNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : GNGAlgorithm<Trait>(screen_height, screen_width){}
+    virtual void init();
+	virtual void exec(sf::Vertex input);
+    bool isConnected(NodePtr node1, NodePtr node2);
+    double getDistance(NodePtr node, sf::Vertex input);
+
+};
+
+template <class Trait>
+class UGNGAlgorithm{ 
+    typedef typename Graph<Trait>::NodeContent NodeContent;
+    typedef ::Edge<Graph<Trait>>* EdgePtr;
+    typedef ::Node<Graph<Trait>>* NodePtr;
+
+    //Encuentra el nodo con la minima utilidad
+	auto findMinUtility(Graph<Trait> &graph);
+
+ public:
+    UGNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : GNGAlgorithm<Trait>(screen_height, screen_width){}
+    virtual void init();
+    virtual	void exec(sf::Vertex input);
 };
 #include "gng_algo.cpp"
 #endif //GRAPH_NULL_GNG_H

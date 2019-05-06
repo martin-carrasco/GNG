@@ -14,36 +14,46 @@
 #define SCREEN_HEIGHT 640
 #define SCREEN_WIDTH 640
 
-
-template<class Trait>
+template <class Trait, class Algorithm>
 class GNGContainer {
 protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
-    typedef ::Edge<Graph<Trait>>* EdgePtr;
-    GNGAlgorithm<Trait> algo;
-    //Ventana del GNG
+    typedef ::Node<Graph<Trait>>* EdgePtr;
+
+    void drawNode(int x, int y);
+    void drawEdge(EdgePtr edge_ptr, NodePtr node_ptr);
+    void drawCounter();
+
+    Algorithm<Trait> algo;
+    
     sf::RenderWindow window;
-
-    //Vector de posicion de lineas auxiliar
-    std::vector<sf::Vector2f> lineas;
-
-    //Auxiliar para dibujo
     bool is_drawing = false;
-
-    //Variable de pause
     bool is_running = false;
 public:
-    GNGContainer() :  algo(SCREEN_HEIGHT, SCREEN_WIDTH) {}
+    GNGContainer() : algo(SCREEN_HEIGHT, SCREEN_WIDTH) {}
+    virtual void init() = 0;
+    virtual void start() = 0;
+};
+
+template<class Trait, class Algorithm>
+class DefaultGNGContainer {
+protected:
+    typedef ::Node<Graph<Trait>>* NodePtr;
+    typedef ::Edge<Graph<Trait>>* EdgePtr;
+public:
+    DefaultGNGContainer() :  GNGContainer<Trait, Algorithm>() {}
     virtual void init();
     virtual void start();
 };
-template<class Trait>
-class PictureGNGContainer : public GNGContainer<Trait> {
+
+template<class Trait, class Algorithm>
+class PictureGNGContainer{
     typedef ::Node<Graph<Trait>>* NodePtr;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
+
     vector<pair<int, int>> pic_vector; 
 public:
-    PictureGNGContainer() = default;
+    PictureGNGContainer() : GNGContainer<Trait, Algorithm>(){}
     virtual void init();
     virtual void start();
 };

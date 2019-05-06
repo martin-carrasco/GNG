@@ -15,11 +15,11 @@ using namespace std;
 int main(int argc, char *argv[]) {
     	int mode = atoi(argv[1]);
         if(mode == 0){
-            GNGContainer<GNGTrait> container;
+            GNGContainer<UGNGTrait, UGNGAlgorithm> container;
             container.init();
             container.start();
         }else{
-            PictureGNGContainer<GNGTrait> container;
+            PictureGNGContainer<GNGTrait, DefaultGNGAlgorithm> container;
             container.init();
             container.start();
         }
