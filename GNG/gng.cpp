@@ -46,13 +46,13 @@ void GNGContainer<Algorithm, Trait>::drawEdge(EdgePtr edge_ptr, NodePtr node_ptr
 }
 
 template<template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::init(){
+void DefaultGNGContainer<Algorithm, Trait>::init(){
 	this->window.create(sf::VideoMode(SCREEN_HEIGHT, SCREEN_WIDTH), "Growing Neural Gas");
 	this->algo.init();
 }
 
 template<template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::start() {
+void DefaultGNGContainer<Algorithm, Trait>::start() {
 	bool is_pressed = false;
 	vector<sf::VertexArray> figures;
 	sf::VertexArray current_figure(sf::LinesStrip, 100);
@@ -113,16 +113,16 @@ void GNGContainer<Algorithm, Trait>::start() {
 				if(is_pressed){ int x = event.mouseMove.x;
 					int y = event.mouseMove.y;
 					sf::Vector2i vec(x, y);
-					sf::Vector2f pos = window.mapPixelToCoords(vec);
+					sf::Vector2f pos = this->window.mapPixelToCoords(vec);
 					current_figure.append(sf::Vertex(pos));
 				}
 
 			}
 			else if (event.type == sf::Event::KeyPressed){
 				if(event.key.code == sf::Keyboard::Space)
-					is_running = !is_running;
+					this->is_running = !this->is_running;
 				else if (event.key.code = sf::Keyboard::Escape) {
-					if(!is_running){
+					if(!this->is_running){
 						current_figure.clear();
 						figures.clear();
 						this->window.clear();
