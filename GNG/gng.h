@@ -7,8 +7,6 @@
 
 #include "gng_algo.h"
 #include "input_generator.h"
-#include "SFML/Graphics.hpp"
-#include <random>
 #include <functional>
 
 #define SCREEN_HEIGHT 640

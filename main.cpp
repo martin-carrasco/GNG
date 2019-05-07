@@ -5,9 +5,7 @@
 #include <algorithm>
 #include <queue>
 #include <assert.h>
-#include "graph.h"
 #include "GNG/gng.h"
-#include "SFML/Graphics.hpp"
 
 using namespace std;
 
