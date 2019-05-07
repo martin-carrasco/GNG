@@ -39,14 +39,18 @@ public:
     GNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : SCREEN_HEIGHT(screen_height), SCREEN_WIDTH(screen_width) {}
     bool isConnected(NodePtr node1, NodePtr node2);
     double getDistance(NodePtr node, sf::Vertex input);
-    int get_iteracion();
-    auto get_graph();
-    virtual void exec(sf::Vertex input); 
-    virtual void init();
+    unsigned int get_iteracion(){
+        return this->iteracion;
+    }
+    auto get_graph(){
+        return base_graph;
+    }
+    virtual void exec(sf::Vertex input) = 0; 
+    virtual void init() = 0;
 };
 
 template <class Trait>
-class DefaultGNGAlgorithm{
+class DefaultGNGAlgorithm : public GNGAlgorithm<Trait> {
     typedef typename Graph<Trait>::NodeContent NodeContent;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
     typedef ::Node<Graph<Trait>>* NodePtr;
@@ -55,13 +59,11 @@ public:
     DefaultGNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : GNGAlgorithm<Trait>(screen_height, screen_width){}
     virtual void init();
 	virtual void exec(sf::Vertex input);
-    bool isConnected(NodePtr node1, NodePtr node2);
-    double getDistance(NodePtr node, sf::Vertex input);
 
 };
 
 template <class Trait>
-class UGNGAlgorithm{ 
+class UGNGAlgorithm : public GNGAlgorithm<Trait> { 
     typedef typename Graph<Trait>::NodeContent NodeContent;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
     typedef ::Node<Graph<Trait>>* NodePtr;

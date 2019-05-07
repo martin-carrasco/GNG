@@ -7,8 +7,8 @@
 
 #define DEBUG 1
 
-template<class Trait, class Algorithm>
-void GNGContainer<Trait, Algorithm>::drawNode(int x, int y){
+template<template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::drawNode(int x, int y){
     sf::CircleShape node_circle(5 , 30);
     node_circle.setFillColor(sf::Color::Green);
     sf::Vector2i vi(x, y);
@@ -17,20 +17,20 @@ void GNGContainer<Trait, Algorithm>::drawNode(int x, int y){
     node_circle.setPosition(v_test);
     this->window.draw(node_circle);
 }
-template <class Trait, class Algorithm>
-void GNGContainer<Trait, Algorithm>::drawCounter(){
+template <template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::drawCounter(){
     sf::Text it_text;
     sf::Font font;
     font.loadFromFile("arial.ttf");
 
     it_text.setFont(font);
-    it_text.setString(to_string(this->algo.get_iteracion()));
+    it_text.setString(to_string(algo.get_iteracion()));
     it_text.setCharacterSize(12);
     it_text.setPosition(SCREEN_WIDTH-50, 0);
-    (this->window).draw(it_text);
+    window.draw(it_text);
 }
-template <class Trait, class Algorithm>
-void GNGContainer<Trait, Algorithm>::drawEdge(EdgePtr edge_ptr, NodePtr node_ptr){
+template <template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::drawEdge(EdgePtr edge_ptr, NodePtr node_ptr){
 	NodePtr node_dest_ptr = edge_ptr->getDest(node_ptr);
         
     sf::Vector2i start_vi(node_ptr->getContent().pos[0], node_ptr->getContent().pos[1]);
@@ -45,14 +45,14 @@ void GNGContainer<Trait, Algorithm>::drawEdge(EdgePtr edge_ptr, NodePtr node_ptr
         this->window.draw(edge, 2, sf::LinesStrip);
 }
 
-template<class Trait, class Algorithm>
-void GNGContainer<Trait, Algorithm>::init(){
+template<template <class> class Algorithm, class Trait>
+void DefaultGNGContainer<Algorithm, Trait>::init(){
 	this->window.create(sf::VideoMode(SCREEN_HEIGHT, SCREEN_WIDTH), "Growing Neural Gas");
 	this->algo.init();
 }
 
-template<class Trait, class Algorithm>
-void GNGContainer<Trait, Algorithm>::start() {
+template<template <class> class Algorithm, class Trait>
+void DefaultGNGContainer<Algorithm, Trait>::start() {
 	bool is_pressed = false;
 	vector<sf::VertexArray> figures;
 	sf::VertexArray current_figure(sf::LinesStrip, 100);
@@ -61,7 +61,7 @@ void GNGContainer<Trait, Algorithm>::start() {
 		sf::Event event;
 
 		//Ciclo de
-		if (is_running) {
+		if (this->is_running) {
 			UniformDistributionInputGenerator<Trait>inpt_gen = UniformDistributionInputGenerator<Trait>(figures);
 			while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 40000){
 
@@ -82,8 +82,7 @@ void GNGContainer<Trait, Algorithm>::start() {
 				        this->drawEdge(edge_ptr, node_ptr);	
 					}
 				}
-                drawCounter(); 
-                this->window.draw(it_text);
+                this->drawCounter(); 
 				for(auto v : figures){
 					this->window.draw(v);
 				}
@@ -114,16 +113,16 @@ void GNGContainer<Trait, Algorithm>::start() {
 				if(is_pressed){ int x = event.mouseMove.x;
 					int y = event.mouseMove.y;
 					sf::Vector2i vec(x, y);
-					sf::Vector2f pos = window.mapPixelToCoords(vec);
+					sf::Vector2f pos = this->window.mapPixelToCoords(vec);
 					current_figure.append(sf::Vertex(pos));
 				}
 
 			}
 			else if (event.type == sf::Event::KeyPressed){
 				if(event.key.code == sf::Keyboard::Space)
-					is_running = !is_running;
+					this->is_running = !this->is_running;
 				else if (event.key.code = sf::Keyboard::Escape) {
-					if(!is_running){
+					if(!this->is_running){
 						current_figure.clear();
 						figures.clear();
 						this->window.clear();
@@ -136,8 +135,8 @@ void GNGContainer<Trait, Algorithm>::start() {
 		this->window.display();
 	}
 }
-template <class Trait, Algorithm>
-void PictureGNGContainer<Trait, Algorithm>::init(){ 
+template <template <class> class Algorithm, class Trait>
+void PictureGNGContainer<Algorithm, Trait>::init(){ 
 	this->window.create(sf::VideoMode(SCREEN_HEIGHT, SCREEN_WIDTH), "Growing Neural Gas");
 	this->algo.init();
     string line;
@@ -155,8 +154,8 @@ void PictureGNGContainer<Trait, Algorithm>::init(){
     }
     file.close();
 } 
-template <class Trait, Algorithm>
-void PictureGNGContainer<Trait, Algorithm>::start(){
+template <template <class> class Algorithm, class Trait>
+void PictureGNGContainer<Algorithm, Trait>::start(){
     vector<sf::VertexArray> v_transform;
 	sf::VertexArray figures(sf::Points, 640);
     for(const pair<int,int>& p : this->pic_vector){
@@ -175,7 +174,7 @@ void PictureGNGContainer<Trait, Algorithm>::start(){
 		//Ciclo de
 		if (1) {
 			DefaultInputGenerator<Trait>inpt_gen = DefaultInputGenerator<Trait>(v_transform);
-			while(inpt_gen.size() > 0 && algo.get_iteracion() < 40000){
+			while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 40000){
                 
 				this->window.clear(sf::Color::Black); 
                 sf::Vertex tmp = inpt_gen.pop();
@@ -186,14 +185,14 @@ void PictureGNGContainer<Trait, Algorithm>::start(){
 				
 				//Draws each edge
 				for(NodePtr node_ptr : g.getNodesVector()){
-                    this->drawNode(node_ptr);
+                   this->drawNode(node_ptr->getContent().pos[0], node_ptr->getContent().pos[1]);
 
 					//Draws each edge
 					for(EdgePtr edge_ptr : node_ptr->getEdges()){
-				        this->drawNode(edge_ptr, node_ptr);	
+				        this->drawEdge(edge_ptr, node_ptr);	
 					}
 				}
-                drawCounter(this->window);
+                this->drawCounter();
 				this->window.draw(figures);
 				this->window.display();
 				sf::sleep(sf::milliseconds(1));

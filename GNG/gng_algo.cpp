@@ -31,7 +31,7 @@ auto GNGAlgorithm<Trait>::findMaxErrorLink(NodePtr node){
 	return max_node;
 }
 template <class Trait>
-void GNGAlgorithm<Trait>::init() {
+void DefaultGNGAlgorithm<Trait>::init() {
     //this->iteracion = 0;
 	this->base_graph.clear();
 	double pos1[2];
@@ -56,7 +56,7 @@ void GNGAlgorithm<Trait>::init() {
 
 }
 template<class Trait>
-void GNGAlgorithm<Trait>::exec(sf::Vertex input){
+void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	NodePtr smallestNodes[2];
 	smallestNodes[0] = nullptr;
 	smallestNodes[1] = nullptr;
@@ -68,7 +68,7 @@ void GNGAlgorithm<Trait>::exec(sf::Vertex input){
 	for(NodePtr node : this->base_graph.getNodesVector()){
 		if(smallestNodes[0] == nullptr)
 			smallestNodes[0] = node;
-		else if(getDistance(node, input) < getDistance(smallestNodes[0], input)){
+		else if(this->getDistance(node, input) < this->getDistance(smallestNodes[0], input)){
 			smallestNodes[1] = smallestNodes[0];
 			smallestNodes[0] = node;
 		}
@@ -93,7 +93,7 @@ void GNGAlgorithm<Trait>::exec(sf::Vertex input){
 	//Actualizamos el valor del erro incrementantodolo por la distancia
 	//y insertamos la nueva posicion del nodo
 	NodeContent c1 = {{nueva_posicion[0], nueva_posicion[1]},
-				   smallestNodes[0]->getContent().error + getDistance(smallestNodes[0], input)};
+				   smallestNodes[0]->getContent().error + this->getDistance(smallestNodes[0], input)};
 
 	smallestNodes[0]->setContent(c1);
 
@@ -131,7 +131,7 @@ void GNGAlgorithm<Trait>::exec(sf::Vertex input){
 	}
 
 	//Se crea una coneccion entre los nodos menores si no hay una
-	if(!isConnected(smallestNodes[0], smallestNodes[1]))
+	if(!this->isConnected(smallestNodes[0], smallestNodes[1]))
 		this->base_graph.insertEdge(0, smallestNodes[0]->getContent(), smallestNodes[1]->getContent(), false);
 
 	//Busca a lo largo de todos los nodos y si ya no tienen aristas los elimina del grafo
@@ -214,7 +214,7 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	for(NodePtr node : this->base_graph.getNodesVector()){
 		if(smallestNodes[0] == nullptr)
 			smallestNodes[0] = node;
-		else if(getDistance(node, input) < getDistance(smallestNodes[0], input)){
+		else if(this->getDistance(node, input) < this->getDistance(smallestNodes[0], input)){
 			smallestNodes[1] = smallestNodes[0];
 			smallestNodes[0] = node;
 		}
@@ -279,7 +279,7 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	}
 
 	//Se crea una coneccion entre los nodos menores si no hay una
-	if(!isConnected(smallestNodes[0], smallestNodes[1]))
+	if(!this->isConnected(smallestNodes[0], smallestNodes[1]))
 		this->base_graph.insertEdge(0, smallestNodes[0]->getContent(), smallestNodes[1]->getContent(), false);
 
 	//Busca el numero con la menor utilidad y divide el mayor error entre esta
