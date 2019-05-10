@@ -130,6 +130,7 @@ private:
     auto findEdge(Node* start, Node* end, EdgeContent content);
 
 public:
+    auto getConnection(Node* node1, Node* node2);
     auto getEdgesVector();
     auto getNodesVector();
 

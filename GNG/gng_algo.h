@@ -13,13 +13,13 @@ protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
 
     static constexpr double K = 3; //Medida de utilidad para eliminar un nodo
-    static constexpr int SIGMA = 400; //Mean error (Medida de error maxima aceptable)
+    static constexpr int SIGMA = 300; //Mean error (Medida de error maxima aceptable)
     static constexpr double ALFA = 0.5;
-    static constexpr double BETA =0.0005;
-    static constexpr double E_W = 0.10; //Movimiento del nodo de comparacion respecto al input
-    static constexpr double E_N = 0.0010; //Movimiento del nodo input respecto al nodo de comparacion
-    static constexpr double MAX_AGE = 50; //TODO Cambiar ???
-    static constexpr int MAX_NODES = 100; //TODO cambiar ???
+    static constexpr double BETA =0.0005; //Decremento del error por ejecucion
+    static constexpr double E_W = 0.05; //Movimiento del nodo de comparacion respecto al input
+    static constexpr double E_N = 0.0006; //Movimiento del nodo input respecto al nodo de comparacion
+    static constexpr double MAX_AGE = 45; //Vida de los edges de los nodos con minimo error
+    static constexpr int MAX_NODES = 70; //TODO cambiar ???
 
 
     unsigned int SCREEN_HEIGHT;
@@ -29,8 +29,6 @@ protected:
 
     Graph<Trait> base_graph; 
    
-    //Finds the node with the max error
-    auto findMaxError(Graph<Trait> &graph); 
 
     //Finds the neighbor with the max error of said node
     auto findMaxErrorLink(NodePtr node);
@@ -38,14 +36,18 @@ protected:
 public:
     GNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : SCREEN_HEIGHT(screen_height), SCREEN_WIDTH(screen_width) {}
     bool isConnected(NodePtr node1, NodePtr node2);
-    double getDistance(NodePtr node, sf::Vertex input);
+    double getDistance(NodePtr node, pair<int, int> input);
+    int getMaxAge(); 
+    //Finds the node with the max error
+    auto findMaxError(Graph<Trait> &graph);
+    double findMaxMeanError();
     unsigned int get_iteracion(){
         return this->iteracion;
     }
     auto get_graph(){
         return base_graph;
     }
-    virtual void exec(sf::Vertex input) = 0; 
+    virtual void exec(pair<int, int> input) = 0; 
     virtual void init() = 0;
 };
 
@@ -58,7 +60,7 @@ class DefaultGNGAlgorithm : public GNGAlgorithm<Trait> {
 public:
     DefaultGNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : GNGAlgorithm<Trait>(screen_height, screen_width){}
     virtual void init();
-	virtual void exec(sf::Vertex input);
+	virtual void exec(pair<int, int> input);
 
 };
 
@@ -74,7 +76,7 @@ class UGNGAlgorithm : public GNGAlgorithm<Trait> {
  public:
     UGNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : GNGAlgorithm<Trait>(screen_height, screen_width){}
     virtual void init();
-    virtual	void exec(sf::Vertex input);
+    virtual	void exec(pair<int, int> input);
 };
 #include "gng_algo.cpp"
 #endif //GRAPH_NULL_GNG_H

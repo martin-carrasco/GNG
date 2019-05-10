@@ -1,29 +1,23 @@
-
-from skimage import data, img_as_float, color, io, img_as_uint
-from skimage.filters import gaussian, threshold_otsu
-from skimage.transform import resize
+import cv2 as cv
 import numpy as np
+from matplotlib import pyplot as plt
 import sys
 
-img = io.imread(sys.argv[1])
-resized_image = resize(img, (640, 640))
-rescaled_image = 255 * resized_image
-final_image = rescaled_image.astype(np.uint8)
+img = cv.imread(sys.argv[1],0)
+img = cv.resize(img, (640, 640))
+img = cv.medianBlur(img,5)
 
-astro = img_as_float(final_image)
-astro_grey = color.rgb2grey(astro)
+ret,th1 = cv.threshold(img,240,255,cv.THRESH_BINARY)
+th3 = cv.adaptiveThreshold(img,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,11,2)
 
+cv.imwrite("output.jpg", th1)
+cv.imwrite("output_edges.jpg", th3)
 
-thresh = threshold_otsu(astro_grey) + 0.1
-binary_astro = astro_grey >= thresh
-io.imshow(binary_astro)
-io.imsave("output.jpg", img_as_uint(binary_astro))
-
+height, width = th1.shape
 data = []
-for (x, y), value in np.ndenumerate(binary_astro):
-	if value == 1:
-		data.append([x, -y])
-
+for (x,y), value in np.ndenumerate(th1):
+    if(value == 0):
+        data.append((y, x))
 m_file = open("output.txt", "wb")
 
 for x,y in data:
@@ -31,3 +25,13 @@ for x,y in data:
 
 m_file.close()
 
+height_e, width_e = th3.shape
+data_e = []
+for (x,y), value in np.ndenumerate(th3):
+    if(value == 0):
+        data_e.append((y,x))
+e_file = open("output_edges.txt", "wb")
+
+for x,y in data_e:
+    e_file.write(str(x) + "," + str(y) + "\n")
+e_file.close()

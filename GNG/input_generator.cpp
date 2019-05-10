@@ -5,25 +5,41 @@ unsigned long InputGenerator<GNGTrait>::size(){
 }
 
 template <class GNGTrait>
-sf::Vertex DefaultInputGenerator<GNGTrait>::pop(){
-	auto item = this->pos_vector.back();
-	this->pos_vector.pop_back();
-	return item;	
+pair<int, int> DefaultInputGenerator<GNGTrait>::pop(){
+    if(this->count < 0)
+        this->count = this->pos_vector.size()-1;
+	auto item = this->pos_vector[this->count];
+    this->count--;
+	return item;
 }
 template <class GNGTrait>
-sf::Vertex UniformDistributionInputGenerator<GNGTrait>::pop(){
+pair<int, int> UniformDistributionInputGenerator<GNGTrait>::pop(){
 	int gen =  dist(re, uniform_int_distribution<int>::param_type(0, this->pos_vector.size()));
-	sf::Vertex toReturn = this->pos_vector[gen];
-	this->pos_vector.erase(this->pos_vector.begin()+gen);
+	pair<int, int> toReturn = this->pos_vector[gen];
 	return toReturn;
 }
-
 template <class GNGTrait>
-InputGenerator<GNGTrait>::InputGenerator(vector<sf::VertexArray> vec){
-	for(auto vertArray : vec){
-		for(int x = 0;x < vertArray.getVertexCount();x++){
-			sf::Vertex v = vertArray[x];
-			pos_vector.push_back(v);
-		}
-	}
+void MovingUniformDistributionInputGenerator<GNGTrait>::moveXAxis() {
+    for(auto element : this->pos_vector){
+       if(element.first >= 640 - 10)
+           direction *= -1;
+       element.first = element.first + direction;
+    }
+}
+template <class GNGTrait>
+pair<int, int> MovingUniformDistributionInputGenerator<GNGTrait>::pop() {
+    int gen = dist(re, uniform_int_distribution<int>::param_type(0, this->pos_vector.size()));
+    pair<int, int> toReturn = this->pos_vector[gen];
+    moveXAxis();
+    return toReturn;
+}
+template <class GNGTrait>
+InputGenerator<GNGTrait>::InputGenerator(vector< vector< pair<int, int> > > vec){
+	this->count = 0;
+    for(auto current_vector : vec){
+        this->count += current_vector.size();
+		for(auto current_pair : current_vector){
+            pos_vector.push_back(current_pair);
+	    }
+    }
 }

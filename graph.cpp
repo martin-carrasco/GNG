@@ -2,6 +2,16 @@
 #include <stdexcept>
 using namespace std;
 
+
+template <class CustomTrait>
+auto Graph<CustomTrait>::getConnection(Node* node1, Node* node2){
+    Edge* e = nullptr;
+    for(Edge* edge : node1->getEdges()){
+        if(edge->getDest(node1) == node2)
+            return edge;
+    }
+    return e;
+}
 template <class CustomTrait>
 auto Graph<CustomTrait>::getEdgesVector() {
     vector<Edge*> visited;

@@ -1,5 +1,27 @@
 #include "gng_algo.h"
 
+
+template <class Trait>
+double GNGAlgorithm<Trait>::findMaxMeanError(){
+    double max_err = 0;
+    for(NodePtr node : base_graph.getNodesVector()){
+        if(node->getContent().error > max_err) 
+            max_err = node->getContent().error;
+    }
+    return max_err;
+}
+template <class Trait>
+int GNGAlgorithm<Trait>::getMaxAge(){
+    double max_age = 0;
+    for(NodePtr node : this->base_graph.getNodesVector() ){
+        for(EdgePtr edge : node->getEdges()){
+            if(edge->getContent() > max_age)
+                max_age = edge->getContent();
+        }
+    }
+    return max_age;
+}
+
 template<class Trait>
 auto GNGAlgorithm<Trait>::findMaxError(Graph<Trait> &graph){
 	NodePtr max_node = nullptr;
@@ -13,10 +35,18 @@ auto GNGAlgorithm<Trait>::findMaxError(Graph<Trait> &graph){
 	return max_node;
 }
 template<class Trait>
-double GNGAlgorithm<Trait>::getDistance(NodePtr node, sf::Vertex input){
-	return 
-			pow(node->getContent().pos[0] - input.position.x, 2) +
-			pow(node->getContent().pos[1] - input.position.y, 2);
+double GNGAlgorithm<Trait>::getDistance(NodePtr node, pair<int, int> input){
+    return
+        /*abs(node->getContent().pos[0] - input.first) +
+        abs(node->getContent().pos[1] - input.first);
+		*/
+        sqrt(
+                pow(node->getContent().pos[0] - input.first, 2) +
+			    pow(node->getContent().pos[1] - input.second, 2)
+                
+        );
+
+        
 }
 template<class Trait>
 auto GNGAlgorithm<Trait>::findMaxErrorLink(NodePtr node){
@@ -56,7 +86,7 @@ void DefaultGNGAlgorithm<Trait>::init() {
 
 }
 template<class Trait>
-void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
+void DefaultGNGAlgorithm<Trait>::exec(pair<int, int> input){
 	NodePtr smallestNodes[2];
 	smallestNodes[0] = nullptr;
 	smallestNodes[1] = nullptr;
@@ -86,8 +116,8 @@ void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	//Input y el menor nodo
 
 	double nueva_posicion[2] = {
-			smallestNodes[0]->getContent().pos[0] + this->E_W *(input.position.x - smallestNodes[0]->getContent().pos[0]),
-			smallestNodes[0]->getContent().pos[1] + this->E_W * (input.position.y - smallestNodes[0]->getContent().pos[1])
+			smallestNodes[0]->getContent().pos[0] + this->E_W *(input.first - smallestNodes[0]->getContent().pos[0]),
+			smallestNodes[0]->getContent().pos[1] + this->E_W * (input.second - smallestNodes[0]->getContent().pos[1])
 	};
 
 	//Actualizamos el valor del erro incrementantodolo por la distancia
@@ -101,9 +131,21 @@ void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	for(EdgePtr e : smallestNodes[0]->getEdges()){
 		NodePtr node_destino = e->getDest(smallestNodes[0]);
 		
-		//Si se encuentra una coneccion entre los 2 menores nodos, cambia la edad a 0
-		if(node_destino == smallestNodes[1])
-			e->setContent(0);
+		//Movemos los nodos vecinos acercandose al input
+		//En el vector de diferencia entre el nodo vecino e input multiplicado por una constante this->E_N
+		double nueva_posicion_vecino[2] = {
+				node_destino->getContent().pos[0] +  this->E_N * (input.first - node_destino->getContent().pos[0]),
+				node_destino->getContent().pos[1] +  this->E_N * (input.second - node_destino->getContent().pos[1])
+		};
+
+		NodeContent nc_vecino = {{nueva_posicion_vecino[0], nueva_posicion_vecino[1]},
+						   node_destino->getContent().error};
+
+		node_destino->setContent(nc_vecino);
+		e->setContent(e->getContent()+1); 
+
+        if(node_destino == smallestNodes[1])
+            e->setContent(0);
 
 		//Eliminamos la arista si exede el maximo age
 		if(e->getContent() > this->MAX_AGE) {
@@ -111,29 +153,11 @@ void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
 							  e->getDest(smallestNodes[0])->getContent(),
 							  e->getContent());
 		}
-
-		//Movemos los nodos vecinos acercandose al input
-		//En el vector de diferencia entre el nodo vecino e input multiplicado por una constante this->E_N
-		double nueva_posicion_vecino[2] = {
-				node_destino->getContent().pos[0] +  this->E_N * (input.position.x - node_destino->getContent().pos[0]),
-				node_destino->getContent().pos[1] +  this->E_N * (input.position.y - node_destino->getContent().pos[1])
-		};
-
-		NodeContent nc_vecino = {{nueva_posicion_vecino[0], nueva_posicion_vecino[1]},
-						   smallestNodes[0]->getContent().error};
-
-		node_destino->setContent(nc_vecino);
-
-
-		//TODO Probar diferentes valores para AGE
-		e->setContent(e->getContent()+1); 
-
 	}
 
 	//Se crea una coneccion entre los nodos menores si no hay una
 	if(!this->isConnected(smallestNodes[0], smallestNodes[1]))
 		this->base_graph.insertEdge(0, smallestNodes[0]->getContent(), smallestNodes[1]->getContent(), false);
-
 	//Busca a lo largo de todos los nodos y si ya no tienen aristas los elimina del grafo
 	for(NodePtr node : this->base_graph.getNodesVector()){
 		if(node->getEdges().empty())
@@ -161,7 +185,7 @@ void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
 				(content_neighbor.pos[1] + content_max.pos[1]) / 2
 		};
 		NodeContent content = {{pos_modificada[0], pos_modificada[1]},
-				content_max.error
+				content_max.error * this->ALFA
 		};
 
 		this->base_graph.insertNode(content);
@@ -191,11 +215,12 @@ void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
 		max_error_node->setContent(content_max);
 		max_error_neighbor->setContent(content_neighbor);
 
-		for(NodePtr node_tmp : this->base_graph.getNodesVector()){
+	}
+
+	for(NodePtr node_tmp : this->base_graph.getNodesVector()){
 			NodeContent content_tmp = node_tmp->getContent();
 			content_tmp.error = content_tmp.error -  this->BETA * content_tmp.error;
 			node_tmp->setContent(content_tmp);
-		}
 	}
 	this->iteracion++;
 
@@ -203,7 +228,7 @@ void DefaultGNGAlgorithm<Trait>::exec(sf::Vertex input){
 
 
 template<class Trait>
-void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
+void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 	NodePtr smallestNodes[2];
 	smallestNodes[0] = nullptr;
 	smallestNodes[1] = nullptr;
@@ -231,8 +256,8 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	//Input y el menor noo
 
 	double nueva_posicion[2] = {
-			smallestNodes[0]->getContent().pos[0] + this->E_W *(input.position.x - smallestNodes[0]->getContent().pos[0]),
-			smallestNodes[0]->getContent().pos[1] + this->E_W * (input.position.y - smallestNodes[0]->getContent().pos[1])
+			smallestNodes[0]->getContent().pos[0] + this->E_W *(input.first - smallestNodes[0]->getContent().pos[0]),
+			smallestNodes[0]->getContent().pos[1] + this->E_W * (input.second - smallestNodes[0]->getContent().pos[1])
 	};
 
 	//Actualizamos el valor del erro incrementantodolo por la distancia
@@ -249,9 +274,25 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	for(EdgePtr e : smallestNodes[0]->getEdges()){
 		NodePtr node_destino = e->getDest(smallestNodes[0]);
 		
-		//Si se encuentra una coneccion entre los 2 menores nodos, cambia la edad a 0
-		if(node_destino == smallestNodes[1])
-			e->setContent(0);
+
+		//Movemos los nodos vecinos acercandose al input
+		//En el vector de diferencia entre el nodo vecino e input multiplicado por una constante this->E_N
+		double nueva_posicion_vecino[2] = {
+				node_destino->getContent().pos[0] +  this->E_N * (input.first - node_destino->getContent().pos[0]),
+				node_destino->getContent().pos[1] +  this->E_N * (input.second - node_destino->getContent().pos[1])
+		};
+
+		NodeContent nc_vecino = {{nueva_posicion_vecino[0], nueva_posicion_vecino[1]},
+						   node_destino->getContent().error,
+						   node_destino->getContent().U};
+
+		node_destino->setContent(nc_vecino);
+
+		//TODO Probar diferentes valores para AGE
+		e->setContent(e->getContent()+1); 
+
+        if(node_destino == smallestNodes[1])
+            e->setContent(0);
 
 		//Eliminamos la arista si exede el maximo age
 		if(e->getContent() > this->MAX_AGE) {
@@ -259,22 +300,6 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 							  e->getDest(smallestNodes[0])->getContent(),
 							  e->getContent());
 		}
-
-		//Movemos los nodos vecinos acercandose al input
-		//En el vector de diferencia entre el nodo vecino e input multiplicado por una constante this->E_N
-		double nueva_posicion_vecino[2] = {
-				node_destino->getContent().pos[0] +  this->E_N * (input.position.x - node_destino->getContent().pos[0]),
-				node_destino->getContent().pos[1] +  this->E_N * (input.position.y - node_destino->getContent().pos[1])
-		};
-
-		NodeContent nc_vecino = {{nueva_posicion_vecino[0], nueva_posicion_vecino[1]},
-						   smallestNodes[0]->getContent().error,
-						   smallestNodes[0]->getContent().U};
-
-		node_destino->setContent(nc_vecino);
-
-		//TODO Probar diferentes valores para AGE
-		e->setContent(e->getContent()+1); 
 
 	}
 
@@ -285,8 +310,9 @@ void UGNGAlgorithm<Trait>::exec(sf::Vertex input){
 	//Busca el numero con la menor utilidad y divide el mayor error entre esta
 	NodeContent min_utility_content = this->findMinUtility(this->base_graph)->getContent();
 	NodeContent tmp_max_error = this->findMaxError(this->base_graph)->getContent();
-	
 
+
+    //Calcula la utilidad del nodo y lo eliminaa dependiendo de que tan baja es
 	if((tmp_max_error.error / min_utility_content.U) > this->K){	
 		this->base_graph.deleteNode(min_utility_content);
 	}
@@ -399,3 +425,4 @@ auto UGNGAlgorithm<Trait>::findMinUtility(Graph<Trait> &graph){
 	}
 	return min_node;
 }
+

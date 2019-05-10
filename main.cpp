@@ -13,7 +13,7 @@ using namespace std;
 int main(int argc, char *argv[]) {
     	int mode = atoi(argv[1]);
         if(mode == 0){
-            DefaultGNGContainer<UGNGAlgorithm, UGNGTrait> container;
+            DefaultGNGContainer<DefaultGNGAlgorithm, GNGTrait> container;
             container.init();
             container.start();
         }else{
