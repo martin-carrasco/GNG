@@ -1,4 +1,8 @@
 
+template <class GNGTrait>
+vector<pair<int, int>> InputGenerator<GNGTrait>::getInput(){
+    return this->pos_vector;
+}
 template<class GNGTrait>
 unsigned long InputGenerator<GNGTrait>::size(){
 	return pos_vector.size();
@@ -34,12 +38,10 @@ pair<int, int> MovingUniformDistributionInputGenerator<GNGTrait>::pop() {
     return toReturn;
 }
 template <class GNGTrait>
-InputGenerator<GNGTrait>::InputGenerator(vector< vector< pair<int, int> > > vec){
-	this->count = 0;
-    for(auto current_vector : vec){
-        this->count += current_vector.size();
-		for(auto current_pair : current_vector){
+InputGenerator<GNGTrait>::InputGenerator(vector< pair<int, int> > vec){
+	this->count =  vec.size();
+    for(auto current_pair : vec){
             pos_vector.push_back(current_pair);
-	    }
-    }
+	}
 }
+

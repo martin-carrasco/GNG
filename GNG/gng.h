@@ -21,11 +21,12 @@ protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
 
+    vector<pair<int,int>> to_single_vec(vector< vector< pair<int,int> > > vec);
     void drawNode(int x, int y, CImg<unsigned char> &currentImg);
     void drawEdge(EdgePtr edge_ptr, NodePtr node_ptr, CImg<unsigned char> &currentImg);
     void drawCounter(CImg<unsigned char> &currentImg);
-    void drawFigure(vector<vector<pair<int, int>>> positions, CImg<unsigned char> &currentImg);
-    void drawPicture(vector< vector< pair<int, int> > > positions, CImg<unsigned char> &currentImg);
+    void drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &currentImg);
+    void drawPicture(vector< pair<int, int> >  positions, CImg<unsigned char> &currentImg);
     Algorithm<Trait> algo;
     
     CImgDisplay window;

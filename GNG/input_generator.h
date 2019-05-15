@@ -13,10 +13,10 @@ protected:
     //Vectores de input que conforman la imagen
     vector<pair<int, int>> pos_vector;
 public:
-    InputGenerator(vector< vector< pair<int, int> > > vec);
+    InputGenerator(vector< pair<int, int> >  vec);
     virtual pair<int, int> pop() = 0;
     unsigned long size();
-
+    vector<pair<int,int>> getInput();
 };
 template <class Trait>
 class MovingUniformDistributionInputGenerator : public InputGenerator<Trait> {
@@ -26,8 +26,9 @@ private:
     void moveXAxis();
     int direction = 1;
 public:
-    MovingUniformDistributionInputGenerator(vector< vector< pair<int, int> > > vec) : InputGenerator<Trait>(vec){}
+    MovingUniformDistributionInputGenerator(vector< pair<int, int> >  vec) : InputGenerator<Trait>(vec){}
     virtual pair<int, int> pop();
+
 };
 template <class Trait>
 class UniformDistributionInputGenerator : public InputGenerator<Trait>{
@@ -35,14 +36,14 @@ private:
 	default_random_engine re;
 	uniform_int_distribution<int> dist;
 public:
-	UniformDistributionInputGenerator(vector< vector< pair<int, int> > > vec) : InputGenerator<Trait>(vec) {}
+	UniformDistributionInputGenerator(vector< pair<int, int> >  vec) : InputGenerator<Trait>(vec) {}
 	virtual pair<int, int> pop();
 };
 
 template <class Trait>
 class DefaultInputGenerator : public InputGenerator<Trait>{
 public:
-    DefaultInputGenerator(vector< vector< pair<int, int> > > vec) : InputGenerator<Trait>(vec) {}
+    DefaultInputGenerator(vector< pair<int, int> > vec) : InputGenerator<Trait>(vec) {}
 	virtual pair<int, int> pop();
 };
 

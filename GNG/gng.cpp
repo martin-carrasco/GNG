@@ -15,31 +15,41 @@ static constexpr int GREEN[] = {0, 255, 0};
 static constexpr int WHITE[] = {255, 255, 255};
 static constexpr int BLUE[] = {0, 0, 255};
 
+
+
 template< template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::drawPicture(vector< vector< pair<int, int> > > positions, CImg<unsigned char> &currentImg){
-    for(auto current_vec : positions){
-        for(auto current_point : current_vec){
+vector<pair<int,int>> GNGContainer<Algorithm, Trait>::to_single_vec(vector< vector< pair<int, int> > > vec){
+    vector<pair<int, int>> toReturn;
+    for(auto current_vector : vec){
+        for(auto current_pair : current_vector){
+            toReturn.push_back(current_pair);
+        }
+    }
+    return toReturn;
+}
+template< template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::drawPicture(vector< pair<int, int> >  positions, CImg<unsigned char> &currentImg){
+    for(auto current_point : positions){
             currentImg.draw_point(current_point.first, current_point.second, WHITE);
-        }
     }
 }
+
 template< template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::drawFigure(vector<vector<pair<int, int>>> positions, CImg<unsigned char> &currentImg){ 
-    for(auto current_vec : positions){
-        pair<int, int> last_point = make_pair(-1, -1);
-        for(auto current_point : current_vec){
-            if(last_point.first == -1 && last_point.second == -1){
-                last_point = current_point;
-                continue;
-            }
-            if(DEBUG)
-                cout << "Drawing point at x0: " << current_point.first << " y0: " << current_point.second
-                << " x1: " << last_point.first << " y:1 " << last_point.second << endl;
-            currentImg.draw_line(last_point.first, last_point.second, current_point.first, current_point.second, WHITE);
+void GNGContainer<Algorithm, Trait>::drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &currentImg){ 
+    pair<int, int> last_point = make_pair(-1, -1);
+    for(auto current_point : positions){
+        if(last_point.first == -1 && last_point.second == -1){
             last_point = current_point;
+            continue;
         }
+        if(DEBUG)
+            cout << "Drawing point at x0: " << current_point.first << " y0: " << current_point.second
+            << " x1: " << last_point.first << " y:1 " << last_point.second << endl;
+        currentImg.draw_line(last_point.first, last_point.second, current_point.first, current_point.second, WHITE);
+        last_point = current_point;
     }
 }
+
 template<template <class> class Algorithm, class Trait>
 void GNGContainer<Algorithm, Trait>::drawNode(int x, int y, CImg<unsigned char> &currentImg){
     currentImg.draw_circle(x, y, 5, GREEN);
@@ -73,14 +83,15 @@ void DefaultGNGContainer<Algorithm, Trait>::init(){
 template<template <class> class Algorithm, class Trait>
 void DefaultGNGContainer<Algorithm, Trait>::start() {
 	bool is_pressed = false;
-    vector<vector<pair<int, int>>> drawing_points;
+    vector< vector< pair<int, int> > > drawing_points;
     CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
     while (!this->window.is_closed()) {
 
-        this->drawFigure(drawing_points, currentImg);	
+        this->drawFigure(this->to_single_vec(drawing_points), currentImg);	
         if (this->is_running) {
+            vector<pair<int,int>> vector_points = this->to_single_vec(drawing_points);
             cout << "Size de puntos: " << drawing_points.size() << endl;
-			UniformDistributionInputGenerator<Trait>inpt_gen = UniformDistributionInputGenerator<Trait>(drawing_points);
+			UniformDistributionInputGenerator<Trait>inpt_gen = UniformDistributionInputGenerator<Trait>(vector_points);
             cout << "Entro al loop con size: " << inpt_gen.size() << endl;
             while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 40000){
                 CImg<unsigned char> point_img(currentImg);
@@ -152,7 +163,7 @@ template <template <class> class Algorithm, class Trait>
 void PictureGNGContainer<Algorithm, Trait>::init(){ 
 	this->algo.init();
     string line;
-    ifstream file("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/output_edges.txt");
+    ifstream file("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/output.txt");
     while(getline(file, line)){
         vector<string> tokens;
         stringstream tmp_read(line);
@@ -166,6 +177,7 @@ void PictureGNGContainer<Algorithm, Trait>::init(){
     }
     file.close();
 } 
+
 template <template <class> class Algorithm, class Trait>
 void PictureGNGContainer<Algorithm, Trait>::start(){
     vector<vector<pair<int, int>>> drawing_points;
@@ -173,10 +185,11 @@ void PictureGNGContainer<Algorithm, Trait>::start(){
     CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
     while (!this->window.is_closed()) {
 
-        this->drawPicture(drawing_points, currentImg);	
+        this->drawPicture(this->to_single_vec(drawing_points), currentImg);	
         if (this->is_running) {
-            cout << "Size de puntos: " << drawing_points.size() << endl;
-			UniformDistributionInputGenerator<Trait>inpt_gen = UniformDistributionInputGenerator<Trait>(drawing_points);
+            vector<pair<int,int>> vector_points = this->to_single_vec(drawing_points);
+            cout << "Size de puntos: " << vector_points.size() << endl;
+			UniformDistributionInputGenerator<Trait>inpt_gen = UniformDistributionInputGenerator<Trait>(vector_points);
             cout << "Entro al loop con size: " << inpt_gen.size() << endl;
             while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 100000){
                 //cout << "Max Age: " << (this->algo).getMaxAge() << endl;
@@ -236,21 +249,21 @@ void MovingPictureGNGContainer<Algorithm, Trait>::init(){
 } 
 template <template <class> class Algorithm, class Trait>
 void MovingPictureGNGContainer<Algorithm, Trait>::start(){
-    vector<vector<pair<int, int>>> drawing_points;
-    drawing_points.push_back(this->pic_vector);
-    CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
+    vector<pair<int, int>> drawing_points; 
+    drawing_points = this->pic_vector;
     while (!this->window.is_closed()) {
-
-        this->drawPicture(drawing_points, currentImg);	
         if (this->is_running) {
-            cout << "Size de puntos: " << drawing_points.size() << endl;
 			MovingUniformDistributionInputGenerator<Trait>inpt_gen = MovingUniformDistributionInputGenerator<Trait>(drawing_points);
-            cout << "Entro al loop con size: " << inpt_gen.size() << endl;
             while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 100000){
-                //cout << "Max Age: " << (this->algo).getMaxAge() << endl;
-                //cout << "Max Mean Error: " << (this->algo).findMaxMeanError() << endl; 
-                CImg<unsigned char> point_img(currentImg);
+                CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
+                
+                drawing_points = inpt_gen.getInput();
 
+                this->drawPicture(drawing_points, currentImg);
+
+                //cout << "Max Age: " << (this->algo).getMaxAge() << endl;
+                //cout << "Max Mean iError: " << (this->algo).findMaxMeanError() << endl; 
+                
 				pair<int, int> tmp = inpt_gen.pop();
 				this->algo.exec(tmp);
 
@@ -259,15 +272,15 @@ void MovingPictureGNGContainer<Algorithm, Trait>::start(){
 				//Draws each edge
 				for(NodePtr node_ptr : g.getNodesVector()){
 				
-				   this->drawNode(node_ptr->getContent().pos[0], node_ptr->getContent().pos[1], point_img);	
+				   this->drawNode(node_ptr->getContent().pos[0], node_ptr->getContent().pos[1],currentImg);	
 
 					//Draws each edge
 					for(EdgePtr edge_ptr : node_ptr->getEdges()){
-				        this->drawEdge(edge_ptr, node_ptr, point_img);	
+				        this->drawEdge(edge_ptr, node_ptr, currentImg);	
 					}
 				}
-                this->drawCounter(point_img); 
-                point_img.display(this->window);
+                this->drawCounter(currentImg); 
+                currentImg.display(this->window);
                // cimg::wait(1);
 			}
             if(inpt_gen.size()  <= 0)
@@ -279,7 +292,6 @@ void MovingPictureGNGContainer<Algorithm, Trait>::start(){
             this->is_running = !this->is_running;
             cout << "Entro a space" << endl;
         }
-        currentImg.display(this->window);
         this->window.wait();
 	}
 }
