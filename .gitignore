@@ -8,11 +8,7 @@
 *.swo
 *.txt
 *CImg.h
-<<<<<<< HEAD
 *.srt
 *.mp4
 
-=======
-*~
->>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
 CMakeFiles/

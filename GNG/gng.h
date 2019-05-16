@@ -21,22 +21,13 @@ protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
 
-<<<<<<< HEAD
     vector<pair<int,int>> to_single_vec(vector< vector< pair<int,int> > > vec); 
     void drawExtras(Graph<Trait> graph, int exec_count, CImg<unsigned char> &current_img);
     
+    void drawPicture(vector<pair<int,int>> positions, CImg<unsigned char> &current_img);
     void drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &current_img);
     void getInput(GNGExec<Algorithm, Trait> &exe);
     Algorithm<Trait>* algo;
-=======
-    vector<pair<int,int>> to_single_vec(vector< vector< pair<int,int> > > vec);
-    void drawNode(int x, int y, CImg<unsigned char> &currentImg);
-    void drawEdge(EdgePtr edge_ptr, NodePtr node_ptr, CImg<unsigned char> &currentImg);
-    void drawCounter(CImg<unsigned char> &currentImg);
-    void drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &currentImg);
-    void drawPicture(vector< pair<int, int> >  positions, CImg<unsigned char> &currentImg);
-    Algorithm<Trait> algo;
->>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
     
     CImgDisplay window;
     CImg<unsigned char> background;
