@@ -7,7 +7,6 @@
 
 #include "gng_exec.h"
 #include "gng_algo.h"
-#include "../CImg.h"
 #include <functional>
 
 #define SCREEN_HEIGHT 640
@@ -22,25 +21,20 @@ protected:
     typedef ::Edge<Graph<Trait>>* EdgePtr;
 
     vector<pair<int,int>> to_single_vec(vector< vector< pair<int,int> > > vec); 
-    void drawExtras(Graph<Trait> graph, int exec_count, CImg<unsigned char> &current_img);
-    
-    void drawPicture(vector<pair<int,int>> positions, CImg<unsigned char> &current_img);
-    void drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &current_img);
-    void getInput(GNGExec<Algorithm, Trait> &exe);
+
     Algorithm<Trait>* algo;
-    
-    CImgDisplay window;
-    CImg<unsigned char> background;
+    CImgDisplay* window;
 
     bool is_drawing = false;
 public:
     GNGContainer() {
         algo = new Algorithm<Trait>(SCREEN_WIDTH, SCREEN_HEIGHT);
-        background.assign(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
-        window.assign(background, "Growing Neural Gas");
+        window = = new CImgDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, "Growing Neural Gas");
     }
+
     virtual void init();
     virtual void start();
+    virtual void getInput(GNGExec<Algorithm, Trait> exe);
 };
 
 template<template <class> class Algorithm, class Trait>
@@ -81,6 +75,7 @@ public:
     virtual void init();
     virtual void start();
 
+    vector< pair<int,int> > parseFrame(CImg<unsigned char> frame);
     vector<pair<int,int>> getBinaryPoints(CImg<unsigned char> img);
     void binarizeImg(CImg<unsigned char> &img);
 };

@@ -17,7 +17,7 @@ protected:
     static constexpr double BETA =0.0005; //Decremento del error por ejecucion
     static constexpr double E_W = 0.05; //Movimiento del nodo de comparacion respecto al input
     static constexpr double E_N = 0.0006; //Movimiento del nodo input respecto al nodo de comparacion
-    static constexpr double MAX_AGE = 45; //Vida de los edges de los nodos con minimo error
+    static constexpr double MAX_AGE = 100; //Vida de los edges de los nodos con minimo error
     static constexpr int MAX_NODES = 70; //TODO cambiar ???
 
 

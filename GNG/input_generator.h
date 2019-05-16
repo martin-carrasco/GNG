@@ -12,14 +12,12 @@ protected:
     //Vectores de input que conforman la imagen
     vector<pair<int, int>> pos_vector;
 public:
-    IG(){}
-    IG(const vector< pair<int, int> >  vec);
-    IG(const IG &input_gen);
-    IG& operator=(const IG &input_gen);
+    IG(vector< pair<int, int> >  vec);
 
     virtual pair<int, int> pop();
     unsigned long size();
-    vector<pair<int,int>> getInput();
+    vector< pair<int,int> > getInput();
+    void setInput(vector< pair<int, int> > vec);
 };
 
 //Uniform Distribution
@@ -29,9 +27,6 @@ private:
 	uniform_int_distribution<int> dist;
 public:
 	UIG(vector< pair<int, int> >  vec) : IG(vec){}
-    UIG(const UIG &input_gen);
-    UIG& operator=(const UIG &input_gen);
-
 	virtual pair<int, int> pop();
 };
 
@@ -44,8 +39,6 @@ private:
     int direction = 1;
 public:
     MUIG(vector< pair<int, int> >  vec) : IG(vec){}
-    MUIG(const MUIG &input_gen);
-    MUIG& operator=(const MUIG &input_gen);
 
     virtual pair<int, int> pop();
 };

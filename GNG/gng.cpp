@@ -3,11 +3,11 @@
 #include <cmath>
 #include <vector>
 #include "gng.h"
+#include "img_manager.h"
 #include <sstream>
-#include "../CImg.h"
 
 #define DEBUG 1
-#define MAX_EXECUTIONS 5000
+#define MAX_EXECUTIONS 40000
 
 using namespace cimg_library;
 
@@ -15,7 +15,6 @@ static constexpr int RED[] = {255, 0, 0};
 static constexpr int GREEN[] = {0, 255, 0};
 static constexpr int WHITE[] = {255, 255, 255};
 static constexpr int BLUE[] = {0, 0, 255};
-
 
 
 template< template <class> class Algorithm, class Trait>
@@ -30,63 +29,22 @@ vector<pair<int,int>> GNGContainer<Algorithm, Trait>::to_single_vec(vector< vect
 }
 
 template< template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::getInput(GNGExec<Algorithm, Trait> &exe){
+void GNGContainer<Algorithm, Trait>::getInput(GNGExcec<Algorithm, Trait> exe){
 
+    vector< vector< pair<int,int> > > drawing_points;
+    //When receiving and ESC key clears the image and the vector of points
+    if(this->window.is_key() && this->window.is_keyESC()){
+        drawing_points.clear();
+        current_img.assign(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
+        cout << "cleared " << endl;
+    }
+    
     if(this->window.is_key() && this->window.is_keySPACE()){
         exe.setRunning(true);
+        exe.setInputData(this->to_single_vec(drawing_points));
     }
+
 }
-template< template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::drawPicture(vector< pair<int, int> >  positions, CImg<unsigned char> &currentImg){
-    for(auto current_point : positions){
-            currentImg.draw_point(current_point.first, current_point.second, WHITE);
-    }
-}
-
-template< template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &currentImg){ 
-    pair<int, int> last_point = make_pair(-1, -1);
-    for(auto current_point : positions){
-        if(last_point.first == -1 && last_point.second == -1){
-            last_point = current_point;
-            continue;
-        }
-        if(DEBUG)
-            cout << "Drawing point at x0: " << current_point.first << " y0: " << current_point.second
-            << " x1: " << last_point.first << " y:1 " << last_point.second << endl;
-        currentImg.draw_line(last_point.first, last_point.second, current_point.first, current_point.second, WHITE);
-        last_point = current_point;
-    }
-}
-template< template <class> class Algorithm, class Trait>
-void GNGContainer<Algorithm, Trait>::drawExtras(Graph<Trait> graph, int exec_count, CImg<unsigned char> &current_img){
-
-    string iter_string = to_string(exec_count);
-    current_img.draw_text(SCREEN_WIDTH - 50, 20, iter_string.c_str(), BLUE);
-
-    for(NodePtr node_ptr : graph.getNodesVector()){
-
-        current_img.draw_circle(node_ptr->getContent().pos[0], 
-                                node_ptr->getContent().pos[1], 
-                                5, 
-                                GREEN);
-        for(EdgePtr edge_ptr : node_ptr->getEdges()){
-
-	        NodePtr node_dest_ptr = edge_ptr->getDest(node_ptr); 
-            if(DEBUG){
-                int x0,y0,x1,y1;
-                x0 = node_ptr->getContent().pos[0];
-                y0 = node_ptr->getContent().pos[1];
-            
-                x1 = node_dest_ptr->getContent().pos[0];
-                y1 = node_dest_ptr->getContent().pos[1];
-
-                current_img.draw_line(x0, y0, x1, y1, RED);
-            }
-        }
-    }
-}
-
 template<template <class> class Algorithm, class Trait>
 void GNGContainer<Algorithm, Trait>::init(){
 	this->algo->init();
@@ -94,24 +52,29 @@ void GNGContainer<Algorithm, Trait>::init(){
 
 template<template <class> class Algorithm, class Trait>
 void GNGContainer<Algorithm, Trait>::start() {
-	bool is_pressed = false;
+    ImageManger<Trait> img_manager(SCREEN_WIDTH, SCREEN__HEIGHT);
     vector< vector< pair<int, int> > > drawing_points;
-    CImg<unsigned char> current_img;
-    GNGExec<Algorithm, Trait> exe(this->algo, this->to_single_vec(drawing_points), GenType::UNIFORM_DISTRIBUTION);
+    GNGExec<Algorithm, Trait> exe(this->algo, this->to_single_vec(drawing_points), UNIFORM_DISTRIBUTION);
+	bool is_pressed = false;
+    bool is_drawn = false;
     while (!this->window.is_closed()) {
-        if(exe.isRunning()){ 
-            vector<pair<int,int>> vector_points = this->to_single_vec(drawing_points);
+        
+        if(exe.getExecutionCount() < MAX_EXECUTIONS){
+            //Calls the executor to draw everything to the screen
+            img_manager.drawFigure();
+            img_manager.drawExtras();
+
+            //Calls the algorithm to get an input and execute next loop if not reached the maximum iterations
             exe.next();
-            this->drawExtras(this->algo->get_graph(), exe.getExecutionCount(), current_img);
 
-            if(exe.getExecutionCount() > MAX_EXECUTIONS)
-                exe.setRunning(false);
+            //Calls the input to get and handle it
+            this->getInput(exe);
 
-
-            current_img.display(this->window);
             cimg::wait(1);
-        }else{
-            //When click is pressed saves point and realeases it when click is released
+        }
+
+        if(!is_drawn){
+           //When click is pressed saves point and realeases it when click is released
             if(this->window.button()){
                 vector<pair<int, int>> tmp_cord_holder;
                 while( this->window.button() & 1){ 
@@ -137,20 +100,11 @@ void GNGContainer<Algorithm, Trait>::start() {
                 //If there is a queued line push it to the accepted drawing
                 if(tmp_cord_holder.size() != 0)
                     drawing_points.push_back(tmp_cord_holder);
-            } 
-            //When receiving and ESC key clears the image and the vector of points
-            if(this->window.is_key() && this->window.is_keyESC()){
-                drawing_points.clear();
-                current_img.assign(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
-                cout << "cleared " << endl;
             }
-            this->drawFigure(this->to_single_vec(drawing_points), current_img);
-            current_img.display(this->window);
-            this->getInput(exe);
-            
+            this->drawFigure(this->to_single_vec(drawing_points));
+            current_img.display(this->window);           
         }
-        
-    }
+    }   
 }
 
 template <template <class> class Algorithm, class Trait>
@@ -185,7 +139,7 @@ void PictureGNGContainer<Algorithm, Trait>::start(){
             current_img.display(this->window);
             cimg::wait(1);
 		}else{
-	        this->getInput(exe);
+	        //TODO add get input to set running
         }
             
     }
@@ -259,29 +213,46 @@ template< template <class> class Algorithm, class Trait>
 void VideoGNGContainer<Algorithm, Trait>::init(){
 	this->algo->init();
     frame_list.load_video("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/video/output.mp4");
-    if(DEBUG) cout << "Loaded GIF to memory" << endl;
+    if(DEBUG) cout << "Loaded video to memory" << endl;
 }
 
 template< template <class> class Algorithm, class Trait>
-void VideoGNGContainer<Algorithm, Trait>::start(){ 
-    GNGExec<Algorithm, Trait> exe(this->algo, vector<pair<int,int>>(), GenType::UNIFORM_DISTRIBUTION);
+void VideoGNGContainer<Algorithm, Trait>::start(){
     this->current_frame = this->frame_list.data();
-    //this->current_frame = *iter;
+    vector< pair<int,int> > drawing_points = this->parseFrame(*current_frame);
+    GNGExec<Algorithm, Trait> exe(this->algo, drawing_points, GenType::UNIFORM_DISTRIBUTION);
+    
+    exe.setRunning(true);
 
     while (!this->window.is_closed()) {
-        current_frame->display(this->window);
+
         if(exe.isRunning()){
-           vector<pair<int,int>> drawing_points;
-           exe.setInputData(drawing_points);
+            CImg<unsigned char> draw_frame = *current_frame;
            exe.next();
-           this->drawExtras(this->algo->get_graph(), exe.getExecutionCount(),*current_frame);
+           this->drawExtras(this->algo->get_graph(), exe.getExecutionCount(),draw_frame);
+           draw_frame.display(this->window);
+           cimg::wait(1);
         }
-        if(exe.getExecutionCount() % 10)
+        if(exe.getExecutionCount() % 10000 == 0){
             current_frame++;
 
-        this->getInput(exe);
-        //TODO CHANGE FRAMES
+            if(current_frame == nullptr){
+                cout << "Last frame passed!" << endl;
+                cimg::wait(1000);
+                break;
+            }
+            drawing_points = this->parseFrame(*current_frame);
+            exe.setInputData(drawing_points);
+        }
+
+        //this->getInput(exe);
     }
+}
+
+template< template <class> class Algorithm, class Trait>
+void VideoGNGContainer<Algorithm, Trait>::binarizeImg(CImg<unsigned char> &img){
+    img.quantize(16).normalize(0, 1).cut(0.2f, 0.8f).threshold(0.5f).normalize(0, 255);
+
 }
 
 template< template <class> class Algorithm, class Trait>
@@ -299,8 +270,19 @@ vector<pair<int,int>> VideoGNGContainer<Algorithm, Trait>::getBinaryPoints(CImg<
     }
     return binary_points;
 }
-template< template <class> class Algorithm, class Trait>
-void VideoGNGContainer<Algorithm, Trait>::binarizeImg(CImg<unsigned char> &img){
-    img.quantize(16).normalize(0, 1).cut(0.2f, 0.8f).threshold(0.5f).normalize(0, 255);
 
+template< template <class> class Algorithm, class Trait>
+vector< pair<int,int> > VideoGNGContainer<Algorithm, Trait>::parseFrame(CImg<unsigned char> frame){
+    vector< pair<int,int> > black_points;
+    cimg_forXY(frame, x, y){
+        int R, G, B;
+        R = frame(x, y, 0, 0);
+        G = frame(x, y, 0, 1);
+        B = frame(x, y, 0, 2);
+        cout << "X: " << x << " Y: " << y << endl;
+        if(R == 0 && G == 0 && B == 0)
+            black_points.push_back(make_pair(x, y));
+        //cout << "RGB -> " << R << "," << G << "," << B << endl;  
+    }
+    return black_points;
 }
