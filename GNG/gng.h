@@ -7,7 +7,7 @@
 
 #include "gng_exec.h"
 #include "gng_algo.h"
-#include "../CImg.h"
+#include <SFML/Graphics.hpp>
 #include <functional>
 
 #define SCREEN_HEIGHT 640
@@ -21,23 +21,21 @@ protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
 
-    vector<pair<int,int>> to_single_vec(vector< vector< pair<int,int> > > vec); 
-    void drawExtras(Graph<Trait> graph, int exec_count, CImg<unsigned char> &current_img);
+    sf::VertexArray to_single_vec(sf::PrimitiveType primitive, vector< sf::VertexArray > vec); 
+    void drawExtras(Graph<Trait> graph, int exec_count);
     
-    void drawPicture(vector<pair<int,int>> positions, CImg<unsigned char> &current_img);
-    void drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &current_img);
+    void imageWait(int time);
+    void drawPicture(sf::VertexArray);
     void getInput(GNGExec<Algorithm, Trait> &exe);
     Algorithm<Trait>* algo;
     
-    CImgDisplay window;
-    CImg<unsigned char> background;
+    sf::RenderWindow window;
 
     bool is_drawing = false;
 public:
     GNGContainer() {
         algo = new Algorithm<Trait>(SCREEN_WIDTH, SCREEN_HEIGHT);
-        background.assign(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
-        window.assign(background, "Growing Neural Gas");
+        window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Growing Neural Gas");
     }
     virtual void init();
     virtual void start();
@@ -49,9 +47,9 @@ class PictureGNGContainer : public GNGContainer<Algorithm, Trait> {
     typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
     typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
 
-    vector<pair<int, int>> pic_vector; 
+    sf::VertexArray pic_vertices; 
 public:
-    PictureGNGContainer() : GNGContainer<Algorithm, Trait>(){}
+    PictureGNGContainer() : GNGContainer<Algorithm, Trait>(){pic_vertices.setPrimitiveType(sf::Points);}
     virtual void init();
     virtual void start();
 };
@@ -62,9 +60,9 @@ class MovingPictureGNGContainer : public GNGContainer< Algorithm, Trait> {
     typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
     typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
 
-    vector< pair<int, int>> pic_vector;
+    sf::VertexArray pic_vertices;
 public:
-    MovingPictureGNGContainer() : GNGContainer<Algorithm, Trait>(){}
+    MovingPictureGNGContainer() : GNGContainer<Algorithm, Trait>(){this->pic_vertices.setPrimitiveType(sf::Points);}
     virtual void init();
     virtual void start();
 };
@@ -74,15 +72,10 @@ class VideoGNGContainer : public GNGContainer<Algorithm, Trait> {
     typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
     typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
    
-    CImg<unsigned char>* current_frame;
-    CImgList<unsigned char> frame_list;
 public:
     VideoGNGContainer() : GNGContainer<Algorithm, Trait>(){}
     virtual void init();
     virtual void start();
-
-    vector<pair<int,int>> getBinaryPoints(CImg<unsigned char> img);
-    void binarizeImg(CImg<unsigned char> &img);
 };
 
 #include "gng.cpp"
