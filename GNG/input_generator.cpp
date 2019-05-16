@@ -1,5 +1,6 @@
 #include "input_generator.h"
 
+<<<<<<< HEAD
 IG::IG(const vector< pair<int, int> > vec){
     
 	this->count =  vec.size();
@@ -22,6 +23,14 @@ vector<pair<int, int>> IG::getInput(){
     return this->pos_vector;
 }
 unsigned long IG::size(){
+=======
+template <class GNGTrait>
+vector<pair<int, int>> InputGenerator<GNGTrait>::getInput(){
+    return this->pos_vector;
+}
+template<class GNGTrait>
+unsigned long InputGenerator<GNGTrait>::size(){
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
 	return pos_vector.size();
 }
 
@@ -81,3 +90,14 @@ pair<int, int> MUIG::pop() {
     moveXAxis();
     return toReturn;
 }
+<<<<<<< HEAD
+=======
+template <class GNGTrait>
+InputGenerator<GNGTrait>::InputGenerator(vector< pair<int, int> > vec){
+	this->count =  vec.size();
+    for(auto current_pair : vec){
+            pos_vector.push_back(current_pair);
+	}
+}
+
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d

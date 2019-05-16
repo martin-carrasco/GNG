@@ -29,18 +29,52 @@ vector<pair<int,int>> GNGContainer<Algorithm, Trait>::to_single_vec(vector< vect
     return toReturn;
 }
 template< template <class> class Algorithm, class Trait>
+<<<<<<< HEAD
 void GNGContainer<Algorithm, Trait>::getInput(GNGExec<Algorithm, Trait> &exe){
 
     if(this->window.is_key() && this->window.is_keySPACE()){
         exe.setRunning(true);
+=======
+void GNGContainer<Algorithm, Trait>::drawPicture(vector< pair<int, int> >  positions, CImg<unsigned char> &currentImg){
+    for(auto current_point : positions){
+            currentImg.draw_point(current_point.first, current_point.second, WHITE);
+    }
+}
+
+template< template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &currentImg){ 
+    pair<int, int> last_point = make_pair(-1, -1);
+    for(auto current_point : positions){
+        if(last_point.first == -1 && last_point.second == -1){
+            last_point = current_point;
+            continue;
+        }
+        if(DEBUG)
+            cout << "Drawing point at x0: " << current_point.first << " y0: " << current_point.second
+            << " x1: " << last_point.first << " y:1 " << last_point.second << endl;
+        currentImg.draw_line(last_point.first, last_point.second, current_point.first, current_point.second, WHITE);
+        last_point = current_point;
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
     }
     this->window.wait();
 }
+<<<<<<< HEAD
 template< template <class> class Algorithm, class Trait>
 void GNGContainer<Algorithm, Trait>::drawFigure(vector< pair<int, int> >  positions, CImg<unsigned char> &current_img){
     for(auto current_point : positions){
             current_img.draw_point(current_point.first, current_point.second, WHITE);
     }
+=======
+
+template<template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::drawNode(int x, int y, CImg<unsigned char> &currentImg){
+    currentImg.draw_circle(x, y, 5, GREEN);
+}
+template <template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::drawCounter(CImg<unsigned char> &currentImg){
+    string iter_string = to_string(algo.get_iteracion());
+    currentImg.draw_text(SCREEN_WIDTH - 50, 20, iter_string.c_str(), BLUE);
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
 }
 template< template <class> class Algorithm, class Trait>
 void GNGContainer<Algorithm, Trait>::drawExtras(Graph<Trait> graph, int exec_count, CImg<unsigned char> &current_img){
@@ -80,8 +114,25 @@ template<template <class> class Algorithm, class Trait>
 void GNGContainer<Algorithm, Trait>::start() {
 	bool is_pressed = false;
     vector< vector< pair<int, int> > > drawing_points;
+<<<<<<< HEAD
     CImg<unsigned char> current_img(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
     GNGExec<Algorithm, Trait> exe(this->algo, vector<pair<int,int>>(), GenType::UNIFORM_DISTRIBUTION);
+=======
+    CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
+    while (!this->window.is_closed()) {
+
+        this->drawFigure(this->to_single_vec(drawing_points), currentImg);	
+        if (this->is_running) {
+            vector<pair<int,int>> vector_points = this->to_single_vec(drawing_points);
+            cout << "Size de puntos: " << drawing_points.size() << endl;
+			UniformDistributionInputGenerator<Trait>inpt_gen = UniformDistributionInputGenerator<Trait>(vector_points);
+            cout << "Entro al loop con size: " << inpt_gen.size() << endl;
+            while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 40000){
+                CImg<unsigned char> point_img(currentImg);
+
+				pair<int, int> tmp = inpt_gen.pop();
+				this->algo.exec(tmp);
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
 
     while (!this->window.is_closed()) {
         if(exe.isRunning()){ 
@@ -159,6 +210,24 @@ void PictureGNGContainer<Algorithm, Trait>::init(){
 
 template <template <class> class Algorithm, class Trait>
 void PictureGNGContainer<Algorithm, Trait>::start(){
+<<<<<<< HEAD
+=======
+    vector<vector<pair<int, int>>> drawing_points;
+    drawing_points.push_back(this->pic_vector);
+    CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
+    while (!this->window.is_closed()) {
+
+        this->drawPicture(this->to_single_vec(drawing_points), currentImg);	
+        if (this->is_running) {
+            vector<pair<int,int>> vector_points = this->to_single_vec(drawing_points);
+            cout << "Size de puntos: " << vector_points.size() << endl;
+			UniformDistributionInputGenerator<Trait>inpt_gen = UniformDistributionInputGenerator<Trait>(vector_points);
+            cout << "Entro al loop con size: " << inpt_gen.size() << endl;
+            while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 100000){
+                //cout << "Max Age: " << (this->algo).getMaxAge() << endl;
+                //cout << "Max Mean Error: " << (this->algo).findMaxMeanError() << endl; 
+                CImg<unsigned char> point_img(currentImg);
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
 
     CImg<unsigned char> current_img(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
     GNGExec<Algorithm, Trait> exe(this->algo, this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
@@ -202,14 +271,24 @@ void MovingPictureGNGContainer<Algorithm, Trait>::start(){
     drawing_points = this->pic_vector;
     while (!this->window.is_closed()) {
         if (this->is_running) {
+<<<<<<< HEAD
 			MUIG inpt_gen(drawing_points);
+=======
+			MovingUniformDistributionInputGenerator<Trait>inpt_gen = MovingUniformDistributionInputGenerator<Trait>(drawing_points);
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
             while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 100000){
                 CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
                 
                 drawing_points = inpt_gen.getInput();
+<<<<<<< HEAD
 
                 this->drawPicture(drawing_points, currentImg);
 
+=======
+
+                this->drawPicture(drawing_points, currentImg);
+
+>>>>>>> 082b121e00b06a7aeeb6fc29a4d1c7d0e3dda46d
                 //cout << "Max Age: " << (this->algo).getMaxAge() << endl;
                 //cout << "Max Mean iError: " << (this->algo).findMaxMeanError() << endl; 
                 
