@@ -258,7 +258,7 @@ void MovingPictureGNGContainer<Algorithm, Trait>::start(){
 template< template <class> class Algorithm, class Trait>
 void VideoGNGContainer<Algorithm, Trait>::init(){
 	this->algo->init();
-    frame_list.load_gif_external("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/video/video.gif");
+    frame_list.load_video("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/video/output.mp4");
     if(DEBUG) cout << "Loaded GIF to memory" << endl;
 }
 
