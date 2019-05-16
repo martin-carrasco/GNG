@@ -5,9 +5,9 @@
 #ifndef GRAPH_NULL_GNG_H
 #define GRAPH_NULL_GNG_H
 
+#include "gng_exec.h"
 #include "gng_algo.h"
 #include "../CImg.h"
-#include "input_generator.h"
 #include <functional>
 
 #define SCREEN_HEIGHT 640
@@ -21,34 +21,23 @@ protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
     typedef ::Edge<Graph<Trait>>* EdgePtr;
 
-    void drawNode(int x, int y, CImg<unsigned char> &currentImg);
-    void drawEdge(EdgePtr edge_ptr, NodePtr node_ptr, CImg<unsigned char> &currentImg);
-    void drawCounter(CImg<unsigned char> &currentImg);
-    void drawFigure(vector<vector<pair<int, int>>> positions, CImg<unsigned char> &currentImg);
-    void drawPicture(vector< vector< pair<int, int> > > positions, CImg<unsigned char> &currentImg);
-    Algorithm<Trait> algo;
+    vector<pair<int,int>> to_single_vec(vector< vector< pair<int,int> > > vec); 
+    void drawExtras(Graph<Trait> graph, int exec_count, CImg<unsigned char> &current_img);
+    
+    void drawFigure(vector<pair<int, int>> positions, CImg<unsigned char> &current_img);
+    void getInput(GNGExec<Algorithm, Trait> &exe);
+    Algorithm<Trait>* algo;
     
     CImgDisplay window;
     CImg<unsigned char> background;
 
     bool is_drawing = false;
-    bool is_running = false;
 public:
-    GNGContainer() : algo(SCREEN_WIDTH, SCREEN_HEIGHT){
+    GNGContainer() {
+        algo = new Algorithm<Trait>(SCREEN_WIDTH, SCREEN_HEIGHT);
         background.assign(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
         window.assign(background, "Growing Neural Gas");
     }
-    virtual void init() = 0;
-    virtual void start() = 0;
-};
-
-template<template <class> class Algorithm, class Trait>
-class DefaultGNGContainer : public GNGContainer<Algorithm, Trait> {
-    friend class GNGContainer<Algorithm, Trait>;
-    typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
-    typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
-public:
-    DefaultGNGContainer() :  GNGContainer<Algorithm, Trait>() {}
     virtual void init();
     virtual void start();
 };
@@ -77,6 +66,22 @@ public:
     MovingPictureGNGContainer() : GNGContainer<Algorithm, Trait>(){}
     virtual void init();
     virtual void start();
+};
+template< template <class> class Algorithm, class Trait>
+class VideoGNGContainer : public GNGContainer<Algorithm, Trait> {
+    friend class GNGContainer<Algorithm, Trait>;
+    typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
+    typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
+   
+    CImg<unsigned char>* current_frame;
+    CImgList<unsigned char> frame_list;
+public:
+    VideoGNGContainer() : GNGContainer<Algorithm, Trait>(){}
+    virtual void init();
+    virtual void start();
+
+    vector<pair<int,int>> getBinaryPoints(CImg<unsigned char> img);
+    void binarizeImg(CImg<unsigned char> &img);
 };
 
 #include "gng.cpp"

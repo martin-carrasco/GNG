@@ -61,7 +61,7 @@ auto GNGAlgorithm<Trait>::findMaxErrorLink(NodePtr node){
 	return max_node;
 }
 template <class Trait>
-void DefaultGNGAlgorithm<Trait>::init() {
+void GNGAlgorithm<Trait>::init() {
     //this->iteracion = 0;
 	this->base_graph.clear();
 	double pos1[2];
@@ -86,7 +86,7 @@ void DefaultGNGAlgorithm<Trait>::init() {
 
 }
 template<class Trait>
-void DefaultGNGAlgorithm<Trait>::exec(pair<int, int> input){
+void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 	NodePtr smallestNodes[2];
 	smallestNodes[0] = nullptr;
 	smallestNodes[1] = nullptr;

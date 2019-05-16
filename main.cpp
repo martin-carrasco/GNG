@@ -13,11 +13,16 @@ using namespace std;
 int main(int argc, char *argv[]) {
     	int mode = atoi(argv[1]);
         if(mode == 0){
-            DefaultGNGContainer<DefaultGNGAlgorithm, GNGTrait> container;
+            GNGContainer<GNGAlgorithm, GNGTrait> container;
             container.init();
             container.start();
-        }else{
-            PictureGNGContainer<DefaultGNGAlgorithm, GNGTrait> container;
+        }else if(mode == 1){
+            VideoGNGContainer<GNGAlgorithm, GNGTrait> container;
+            container.init();
+            container.start();
+        }
+        else{
+            PictureGNGContainer<GNGAlgorithm, GNGTrait> container;
             container.init();
             container.start();
         }

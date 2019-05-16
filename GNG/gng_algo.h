@@ -1,7 +1,6 @@
 #ifndef GRAPH_NULL_GNG_ALGO_H
 #define GRAPH_NULL_GNG_ALGO_H
 
-#include "SFML/Graphics.hpp"
 #include "../graph.h"
 #include <cmath>
 
@@ -38,6 +37,7 @@ public:
     bool isConnected(NodePtr node1, NodePtr node2);
     double getDistance(NodePtr node, pair<int, int> input);
     int getMaxAge(); 
+    
     //Finds the node with the max error
     auto findMaxError(Graph<Trait> &graph);
     double findMaxMeanError();
@@ -47,21 +47,8 @@ public:
     auto get_graph(){
         return base_graph;
     }
-    virtual void exec(pair<int, int> input) = 0; 
-    virtual void init() = 0;
-};
-
-template <class Trait>
-class DefaultGNGAlgorithm : public GNGAlgorithm<Trait> {
-    typedef typename Graph<Trait>::NodeContent NodeContent;
-    typedef ::Edge<Graph<Trait>>* EdgePtr;
-    typedef ::Node<Graph<Trait>>* NodePtr;
-
-public:
-    DefaultGNGAlgorithm(unsigned int screen_height, unsigned int screen_width) : GNGAlgorithm<Trait>(screen_height, screen_width){}
+    virtual void exec(pair<int, int> input); 
     virtual void init();
-	virtual void exec(pair<int, int> input);
-
 };
 
 template <class Trait>
