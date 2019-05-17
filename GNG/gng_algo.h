@@ -11,6 +11,9 @@ protected:
     typedef ::Edge<Graph<Trait>>* EdgePtr;
     typedef ::Node<Graph<Trait>>* NodePtr;
 
+    double mean_error_sum = 0; //Sum of mean error until reset
+    int mean_error_check = 500; // Mean error iteration check
+
     double K = 3; //Medida de utilidad para eliminar un nodo
     int SIGMA = 300; //Mean error (Medida de error maxima aceptable)
     double ALFA = 0.5;

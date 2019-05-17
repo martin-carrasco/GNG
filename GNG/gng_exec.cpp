@@ -6,7 +6,6 @@ void GNGExec<Algorithm, Trait>::next(){
 
     if(!is_running)
         return;
-    //cout << "Max mean: " << this->maxMeanError() << endl;
     pair<int, int> input_point = inpt_gen->pop();
     //cout << input_point.first << ", " << input_point.second << endl;
     this->algorithm->exec(input_point);

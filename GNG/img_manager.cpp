@@ -14,7 +14,7 @@ void ImgManager<Trait>::changeImage(CImg<unsigned char>* img){
 }
 template< class Trait >
 void ImgManager<Trait>::clearMain(){
-    this->main_img->clear();
+    this->main_img->fill(0);
 }
 
 template< class Trait >

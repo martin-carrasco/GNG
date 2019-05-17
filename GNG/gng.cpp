@@ -146,7 +146,6 @@ void PictureGNGContainer<Trait>::start(){
 
 template <class Trait>
 void MovingPictureGNGContainer<Trait>::init(){ 
-	this->algo.init();
     string line;
     ifstream file("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/output.txt");
     while(getline(file, line)){
@@ -162,52 +161,46 @@ void MovingPictureGNGContainer<Trait>::init(){
     }
     file.close();
 } 
+template<class Trait>
+void MovingPictureGNGContainer<Trait>::movePositions(int x, int y){
+    int dir_x = 1;
+    int dir_y = 1;
+    for(auto &[f, s] : this->pic_vector){
+        if(this->window->width() - f < 20 || f < 20)
+            dir_x *= -1;
+        if(this->window->height() - s < 20 || s < 20)
+            dir_y *= -1;
+        f += x;
+        s += y;
+    }
+}
 template <class Trait>
 void MovingPictureGNGContainer<Trait>::start(){
-   /* vector<pair<int, int>> drawing_points; 
-    drawing_points = this->pic_vector;
-    while (!this->window.is_closed()) {
-        if (this->is_running) {
-			MUIG inpt_gen(drawing_points);
-            while(inpt_gen.size() > 0 && this->algo.get_iteracion() < 100000){
-                CImg<unsigned char> currentImg(SCREEN_WIDTH, SCREEN_HEIGHT, 1, 3, 0);
-                
-                drawing_points = inpt_gen.getInput();
-                this->drawPicture(drawing_points, currentImg);
-                //cout << "Max Age: " << (this->algo).getMaxAge() << endl;
-                //cout << "Max Mean iError: " << (this->algo).findMaxMeanError() << endl; 
-                
-				pair<int, int> tmp = inpt_gen.pop();
-				this->algo.exec(tmp);
+    ImgManager<Trait>* img_manager = new ImgManager<Trait>(this->window);
+    GNGExec<UGNGAlgorithm, Trait>* exe = new GNGExec<UGNGAlgorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
+    img_manager->drawPicture(this->pic_vector);
+    while (!this->window->is_closed()) {
+        if(exe->getExecutionCount() < MAX_EXECUTIONS){
+            if(exe->getExecutionCount() % 100 == 0){
+                this->movePositions(1, 0);
+                exe->setInputData(this->pic_vector);
+                img_manager->clearMain();
+                img_manager->drawPicture(this->pic_vector);
+            }
+            exe->next();
+            img_manager->drawExtras(exe->getNodes(), exe->getExecutionCount());
+           // cimg::wait(1);
+        } 
 
-				Graph<Trait> g = this->algo.get_graph();
-
-				//Draws each edge
-				for(NodePtr node_ptr : g.getNodesVector()){
-				
-				   this->drawNode(node_ptr->getContent().pos[0], node_ptr->getContent().pos[1],currentImg);	
-
-					//Draws each edge
-					for(EdgePtr edge_ptr : node_ptr->getEdges()){
-				        this->drawEdge(edge_ptr, node_ptr, currentImg);	
-					}
-				}
-                this->drawCounter(currentImg); 
-                currentImg.display(this->window);
-               // cimg::wait(1);
-			}
-            if(inpt_gen.size()  <= 0)
-                cout << "Input run out" << endl;
-            this->is_running = false;
-
-		}
-        if(this->window.is_key() && this->window.is_keySPACE()){
-            this->is_running = !this->is_running;
-            cout << "Entro a space" << endl;
+        //Toggles running 
+        if(this->window->is_key() && this->window->is_keySPACE()){ 
+            exe->setRunning(true);
         }
-        this->window.wait();
-	}
-    */
+
+    }
+    delete exe;
+    delete img_manager;
+
 }
 template< class Trait>
 void VideoGNGContainer<Trait>::init(){
@@ -223,15 +216,15 @@ void VideoGNGContainer<Trait>::start(){
     GNGExec<UGNGAlgorithm, Trait>* exe = new GNGExec<UGNGAlgorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), drawing_points, GenType::UNIFORM_DISTRIBUTION); 
 
     while (!this->window->is_closed()) {
-        if(exe->getExecutionCount() < MAX_EXECUTIONS){
-            if(exe->getExecutionCount() % 500 == 0){
+        if(exe->getExecutionCount() < MAX_EXECUTIONS*5){
+            if(exe->getExecutionCount() % 700 == 0){
                it++;
                if(it == this->frame_list.end()){
                    cimg::wait(10000);
                    cout << "Got to last frame!" << endl;
-               }
+               } 
+               drawing_points = this->parseFrame(*it);
                img_manager->changeImage( &(*it));
-               this->parseFrame(*it);
                exe->setInputData(drawing_points);
             }
             exe->next();
@@ -275,8 +268,7 @@ vector< pair<int,int> > VideoGNGContainer<Trait>::parseFrame(CImg<unsigned char>
         int R, G, B;
         R = frame(x, y, 0, 0);
         G = frame(x, y, 0, 1);
-        B = frame(x, y, 0, 2);
-//        cout << "X: " << x << " Y: " << y << endl;
+        B = frame(x, y, 0, 2);;
         if(R == 0 && G == 0 && B == 0)
             black_points.push_back(make_pair(x, y));
         //cout << "RGB -> " << R << "," << G << "," << B << endl;  

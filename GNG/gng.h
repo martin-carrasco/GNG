@@ -59,6 +59,7 @@ class MovingPictureGNGContainer : public GNGContainer<Trait> {
     typedef typename GNGContainer<Trait>::NodePtr NodePtr;
     typedef typename GNGContainer<Trait>::EdgePtr EdgePtr;
 
+    void movePositions(int x, int y);
     vector< pair<int, int>> pic_vector;
 public:
     MovingPictureGNGContainer() : GNGContainer<Trait>(){}

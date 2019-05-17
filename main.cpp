@@ -20,6 +20,10 @@ int main(int argc, char *argv[]) {
             VideoGNGContainer<UGNGTrait> container;
             container.init();
             container.start();
+        }else if(mode == 2){
+            MovingPictureGNGContainer<UGNGTrait> container;
+            container.init();
+            container.start();
         }
         else{
             PictureGNGContainer<UGNGTrait> container;

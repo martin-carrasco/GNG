@@ -113,6 +113,13 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 	assert(smallestNodes[0] != nullptr && smallestNodes[1] != nullptr && smallestNodes[0] != smallestNodes[1]);
 
 
+    if(this->iteracion % this->mean_error_check == 0){
+        cout << "Mean Error: " << this->mean_error_sum / this->mean_error_check << endl;
+        this->mean_error_sum = 0;
+    }else{
+        this->mean_error_sum += sqrt(this->getDistance(smallestNodes[0], input));
+    }
+
 	//Nueva posicion de el menor nodo
 	//Esta posicion se calcula por una costante this->E_W multiplicado por el vector de diferencia entre
 	//Input y el menor nodo
@@ -252,6 +259,14 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 			smallestNodes[1] = node;
 	}	
 	assert(smallestNodes[0] != nullptr && smallestNodes[1] != nullptr && smallestNodes[0] != smallestNodes[1]);
+
+    //Mean error debuggin
+    if(this->iteracion % this->mean_error_check == 0){
+        cout << "Mean Error: " << this->mean_error_sum / this->mean_error_check << endl;
+        this->mean_error_sum = 0;
+    }else{
+        this->mean_error_sum += sqrt(this->getDistance(smallestNodes[0], input));
+    }
 
 	//Nueva posicion de el menor nodo
 	//Esta posicion se calcula por una costante E_W multiplicado por el vector de diferencia entre
