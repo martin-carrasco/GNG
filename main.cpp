@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
             container.start();
         }
         else{
-            PictureGNGContainer<GNGTrait> container;
+            PictureGNGContainer<UGNGTrait> container;
             container.init();
             container.start();
         }

@@ -187,7 +187,7 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 				(content_neighbor.pos[1] + content_max.pos[1]) / 2
 		};
 		NodeContent content = {{pos_modificada[0], pos_modificada[1]},
-				content_max.error * this->ALPHA
+				content_max.error * this->ALFA
 		};
 
 		this->base_graph.insertNode(content);
@@ -290,7 +290,6 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 
 		node_destino->setContent(nc_vecino);
 
-		//TODO Probar diferentes valores para AGE
 		e->setContent(e->getContent()+1); 
 
         if(node_destino == smallestNodes[1])
@@ -342,7 +341,7 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 				(content_neighbor.pos[1] + content_max.pos[1]) / 2
 		};
 		NodeContent content = {{pos_modificada[0], pos_modificada[1]},
-				content_max.error, (content_max.U + content_neighbor.U) / 2
+				content_max.error * this->ALFA, (content_max.U + content_neighbor.U) / 2
 		};
 
 		this->base_graph.insertNode(content);

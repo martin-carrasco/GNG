@@ -125,7 +125,7 @@ void PictureGNGContainer<Trait>::init(){
 template <class Trait>
 void PictureGNGContainer<Trait>::start(){
     ImgManager<Trait>* img_manager = new ImgManager<Trait>(this->window);
-    GNGExec<GNGAlgorithm, Trait>* exe = new GNGExec<GNGAlgorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
+    GNGExec<UGNGAlgorithm, Trait>* exe = new GNGExec<UGNGAlgorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
     img_manager->drawPicture(this->pic_vector);
     while (!this->window->is_closed()) {
         if(exe->getExecutionCount() < MAX_EXECUTIONS){
