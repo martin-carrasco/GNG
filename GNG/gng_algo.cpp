@@ -40,12 +40,14 @@ double GNGAlgorithm<Trait>::getDistance(NodePtr node, pair<int, int> input){
         /*abs(node->getContent().pos[0] - input.first) +
         abs(node->getContent().pos[1] - input.first);
 		*/
-        sqrt(
+       /*sqrt(
                 pow(node->getContent().pos[0] - input.first, 2) +
 			    pow(node->getContent().pos[1] - input.second, 2)
                 
-        );
-
+        );*/
+        
+            pow(node->getContent().pos[0] - input.first, 2)  + 
+            pow(node->getContent().pos[1] - input.second, 2);
         
 }
 template<class Trait>
@@ -185,7 +187,7 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 				(content_neighbor.pos[1] + content_max.pos[1]) / 2
 		};
 		NodeContent content = {{pos_modificada[0], pos_modificada[1]},
-				content_max.error * this->ALFA
+				content_max.error * this->ALPHA
 		};
 
 		this->base_graph.insertNode(content);
@@ -370,13 +372,14 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 		max_error_node->setContent(content_max);
 		max_error_neighbor->setContent(content_neighbor);
 
-		for(NodePtr node_tmp : this->base_graph.getNodesVector()){
-			NodeContent content_tmp = node_tmp->getContent();
-			content_tmp.error = content_tmp.error -  this->BETA * content_tmp.error;
-			content_tmp.U = content_tmp.U - this->BETA * content_tmp.U;
-			node_tmp->setContent(content_tmp);
-		}
 	}
+
+    for(NodePtr node_tmp : this->base_graph.getNodesVector()){
+        NodeContent content_tmp = node_tmp->getContent();
+        content_tmp.error = content_tmp.error -  this->BETA * content_tmp.error;
+        content_tmp.U = content_tmp.U - this->BETA * content_tmp.U;
+        node_tmp->setContent(content_tmp);
+    }
 	this->iteracion++;
 
 }

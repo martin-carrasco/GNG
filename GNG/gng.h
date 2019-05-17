@@ -6,6 +6,8 @@
 #define GRAPH_NULL_GNG_H
 
 #include "gng_exec.h"
+#include "img_manager.h"
+#include "../CImg.h"
 #include "gng_algo.h"
 #include <functional>
 
@@ -14,7 +16,7 @@
 
 using namespace cimg_library;
 
-template <template <class> class Algorithm, class Trait>
+template <class Trait>
 class GNGContainer {
 protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
@@ -22,56 +24,58 @@ protected:
 
     vector<pair<int,int>> to_single_vec(vector< vector< pair<int,int> > > vec); 
 
-    Algorithm<Trait>* algo;
     CImgDisplay* window;
 
     bool is_drawing = false;
 public:
+    ~GNGContainer(){
+        delete window;
+    }
     GNGContainer() {
-        algo = new Algorithm<Trait>(SCREEN_WIDTH, SCREEN_HEIGHT);
-        window = = new CImgDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, "Growing Neural Gas");
+        window = new CImgDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, "Growing Neural Gas");
     }
 
     virtual void init();
     virtual void start();
-    virtual void getInput(GNGExec<Algorithm, Trait> exe);
 };
 
-template<template <class> class Algorithm, class Trait>
-class PictureGNGContainer : public GNGContainer<Algorithm, Trait> {
-    friend class GNGContainer<Algorithm, Trait>;
-    typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
-    typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
+template< class Trait>
+class PictureGNGContainer : public GNGContainer<Trait> {
+    friend class GNGContainer<Trait>;
+    typedef typename GNGContainer<Trait>::NodePtr NodePtr;
+    typedef typename GNGContainer<Trait>::EdgePtr EdgePtr;
 
     vector<pair<int, int>> pic_vector; 
 public:
-    PictureGNGContainer() : GNGContainer<Algorithm, Trait>(){}
+    PictureGNGContainer() : GNGContainer<Trait>(){}
     virtual void init();
     virtual void start();
+
 };
 
-template< template <class> class Algorithm, class Trait>
-class MovingPictureGNGContainer : public GNGContainer< Algorithm, Trait> {
-    friend class GNGContainer<Algorithm, Trait>;
-    typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
-    typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
+template<class Trait>
+class MovingPictureGNGContainer : public GNGContainer<Trait> {
+    friend class GNGContainer<Trait>;
+    typedef typename GNGContainer<Trait>::NodePtr NodePtr;
+    typedef typename GNGContainer<Trait>::EdgePtr EdgePtr;
 
     vector< pair<int, int>> pic_vector;
 public:
-    MovingPictureGNGContainer() : GNGContainer<Algorithm, Trait>(){}
+    MovingPictureGNGContainer() : GNGContainer<Trait>(){}
     virtual void init();
     virtual void start();
+    
 };
-template< template <class> class Algorithm, class Trait>
-class VideoGNGContainer : public GNGContainer<Algorithm, Trait> {
-    friend class GNGContainer<Algorithm, Trait>;
-    typedef typename GNGContainer<Algorithm, Trait>::NodePtr NodePtr;
-    typedef typename GNGContainer<Algorithm, Trait>::EdgePtr EdgePtr;
+template<class Trait>
+class VideoGNGContainer : public GNGContainer<Trait> {
+    friend class GNGContainer<Trait>;
+    typedef typename GNGContainer<Trait>::NodePtr NodePtr;
+    typedef typename GNGContainer<Trait>::EdgePtr EdgePtr;
    
     CImg<unsigned char>* current_frame;
     CImgList<unsigned char> frame_list;
 public:
-    VideoGNGContainer() : GNGContainer<Algorithm, Trait>(){}
+    VideoGNGContainer() : GNGContainer<Trait>(){}
     virtual void init();
     virtual void start();
 
