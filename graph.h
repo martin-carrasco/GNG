@@ -38,12 +38,12 @@ public:
         this->edges_list.push_back(edge);
     }
     void removeEdge(Edge* edge){
-	auto it = find(edges_list.begin(), edges_list.end(), edge);
-	if(it != edges_list.end()){	
-		edges_list.erase(it);
-		return;
-	}
-	throw std::invalid_argument("Edge not found");
+        auto it = find(edges_list.begin(), edges_list.end(), edge);
+        if(it != edges_list.end()){	
+            edges_list.erase(it);
+            return;
+        }
+        throw std::invalid_argument("Edge not found");
     }
 
     NodeContent getContent() const {
@@ -84,7 +84,7 @@ public:
         Edge::edge_content = edge_content;
     }
 
-    Node* getDest(Node* node){
+    Node* getDest(Node* node) const {
         if(is_directed){
             if(vertices[1] == node)
                 return nullptr;
@@ -126,36 +126,37 @@ private:
     NodesIterator nodes_iterator;
     EdgesIterator edges_iterator;
 
-    auto findNode(NodeContent content);
-    auto findEdge(Node* start, Node* end, EdgeContent content);
+    auto findNode(NodeContent content) const;
+    auto findEdge(Node* start, Node* end, EdgeContent content) const;
 
 public:
-    auto getConnection(Node* node1, Node* node2);
-    auto getEdgesVector();
-    auto getNodesVector();
+    auto getConnection(Node* node1, Node* node2) const;
+    auto getEdgesVector() const;
+    auto getNodesVector() const;
 
-    bool isDirected();
-    unsigned long size();
-    unsigned long num_edges();
+    bool isDirected() const;
+    unsigned long size() const;
+    unsigned long num_edges() const;
 
     bool insertNode(NodeContent node_content);
     void insertEdge(EdgeContent edge_content, NodeContent start, NodeContent end, bool is_directed);
 
     void deleteNode(NodeContent content);
     void deleteEdge(NodeContent start, NodeContent end, EdgeContent content);
+    void deleteEdge(NodeContent start, NodeContent end);
 
     void clear();
 
-    void describe();
-    void describeHelper(NodesVector to_describe);
+    void describe() const;
+    void describeHelper(NodesVector to_describe) const;
 };
 
 class GNGTrait{
 public:
     struct Node{
-        double pos[2];
+        int pos[2];
         double error;
-        bool operator==(Node &content){
+        bool operator==(Node &content) const{
             return pos[0] == content.pos[0] && pos[1] == content.pos[1] && error == content.error;
         }
     };
@@ -165,10 +166,10 @@ public:
 class UGNGTrait{
 public:
 	struct Node{
-		double pos[2];
+		int pos[2];
 		double error;
 		double U;
-		bool operator==(Node &content){
+		bool operator==(Node &content) const{
 		    return pos[0] == content.pos[0] && pos[1] == content.pos[1] && error == content.error;
 		}
 	};

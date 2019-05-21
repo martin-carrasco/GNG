@@ -3,11 +3,9 @@
 
 template<template <class> class Algorithm, class Trait>
 void GNGExec<Algorithm, Trait>::next(){
-
     if(!is_running)
         return;
     pair<int, int> input_point = inpt_gen->pop();
-    //cout << input_point.first << ", " << input_point.second << endl;
     this->algorithm->exec(input_point);
 }
 template< template <class> class Algorithm, class Trait>

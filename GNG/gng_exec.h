@@ -30,7 +30,6 @@ class GNGExec {
             this->height = dimentions.second;
             this->algorithm = new Algorithm<Trait>(width, height);
             this->algorithm->init();
-
             switch(gen_type)
             {
                 case UNIFORM_DISTRIBUTION:
@@ -44,6 +43,7 @@ class GNGExec {
                     inpt_gen = new IG(input_data);
                     break;
             }
+
             gen_type = gen_type;
         }
       

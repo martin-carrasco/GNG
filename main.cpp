@@ -13,20 +13,20 @@ using namespace std;
 int main(int argc, char *argv[]) {
     	int mode = atoi(argv[1]);
         if(mode == 0){
-            GNGContainer<GNGTrait> container;
+            GNGContainer<GNGAlgorithm, GNGTrait> container;
             container.init();
             container.start();
         }else if(mode == 1){
-            VideoGNGContainer<UGNGTrait> container;
+            VideoGNGContainer<UGNGAlgorithm, UGNGTrait> container;
             container.init();
             container.start();
         }else if(mode == 2){
-            MovingPictureGNGContainer<UGNGTrait> container;
+            MovingPictureGNGContainer<UGNGAlgorithm, UGNGTrait> container;
             container.init();
             container.start();
         }
         else{
-            PictureGNGContainer<UGNGTrait> container;
+            PictureGNGContainer<UGNGAlgorithm, UGNGTrait> container;
             container.init();
             container.start();
         }
