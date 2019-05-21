@@ -49,7 +49,7 @@ int main(){
 
     //ugng_moving();
 
-    ugng_video();
+    gng_video();
     
     return 0;
 }

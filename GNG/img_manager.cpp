@@ -75,13 +75,11 @@ void ImgManager<Trait>::drawExtras(vector<NodePtr> nodes, int exec_count){
         this->drawNode(x0, y0, *current_img);
 
         for(EdgePtr edge_ptr : node_ptr->getEdges()){
-            //if(DEBUG){
-                NodePtr node_dest_ptr = edge_ptr->getDest(node_ptr);
-                x1 = node_dest_ptr->getContent().pos[0];
-                y1 = node_dest_ptr->getContent().pos[1];
-                
-                this->drawEdge(x0, y0, x1, y1, *current_img);
-            //} //TODO FIGURE IT OUT!
+            NodePtr node_dest_ptr = edge_ptr->getDest(node_ptr);
+            x1 = node_dest_ptr->getContent().pos[0];
+            y1 = node_dest_ptr->getContent().pos[1];
+            
+            this->drawEdge(x0, y0, x1, y1, *current_img);
         }
     }
     (*current_img).display(*(this->window));

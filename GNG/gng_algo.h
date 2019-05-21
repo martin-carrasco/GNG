@@ -45,7 +45,6 @@ public:
     
     //Finds the node with the max error
     auto findMaxError(Graph<Trait> &graph);
-    double findMaxMeanError();
     unsigned int get_iteracion(){
         return this->iteracion;
     }

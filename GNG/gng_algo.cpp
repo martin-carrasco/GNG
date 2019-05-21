@@ -11,17 +11,8 @@ void GNGAlgorithm<Trait>::logMeanError(double sum){
 }
 
 template <class Trait>
-double GNGAlgorithm<Trait>::findMaxMeanError(){
-    double max_err = 0;
-    for(NodePtr node : base_graph.getNodesVector()){
-        if(node->getContent().error > max_err) 
-            max_err = node->getContent().error;
-    }
-    return max_err;
-}
-template <class Trait>
 int GNGAlgorithm<Trait>::getMaxAge(){
-    double max_age = 0;
+    int max_age = 0;
     for(NodePtr node : this->base_graph.getNodesVector() ){
         for(EdgePtr edge : node->getEdges()){
             if(edge->getContent() > max_age)
@@ -46,15 +37,6 @@ auto GNGAlgorithm<Trait>::findMaxError(Graph<Trait> &graph){
 template<class Trait>
 double GNGAlgorithm<Trait>::getDistance(NodePtr node, pair<int, int> input){
     return
-        /*abs(node->getContent().pos[0] - input.first) +
-        abs(node->getContent().pos[1] - input.first);
-		*/
-       /*sqrt(
-                pow(node->getContent().pos[0] - input.first, 2) +
-			    pow(node->getContent().pos[1] - input.second, 2)
-                
-        );*/
-        
             pow(node->getContent().pos[0] - input.first, 2)  + 
             pow(node->getContent().pos[1] - input.second, 2);
         
@@ -122,13 +104,6 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 	assert(smallestNodes[0] != nullptr && smallestNodes[1] != nullptr && smallestNodes[0] != smallestNodes[1]);
 
     this->logMeanError(sqrt(this->getDistance(smallestNodes[0], input)));
-
-    if(this->iteracion % this->mean_error_check == 0){
-        cout << "Mean Error: " << this->mean_error_sum / this->mean_error_check << endl;
-        this->mean_error_sum = 0;
-    }else{
-        this->mean_error_sum += sqrt(this->getDistance(smallestNodes[0], input));
-    }
 
 	//Nueva posicion de el menor nodo
 	//Esta posicion se calcula por una costante this->E_W multiplicado por el vector de diferencia entre
@@ -274,7 +249,7 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 
 	//Nueva posicion de el menor nodo
 	//Esta posicion se calcula por una costante E_W multiplicado por el vector de diferencia entre
-	//Input y el menor noo
+	//Input y el menor nodo
 
 	double nueva_posicion[2] = {
 			smallestNodes[0]->getContent().pos[0] + this->E_W *(input.first - smallestNodes[0]->getContent().pos[0]),
@@ -287,7 +262,7 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 	NodeContent c1 = {{nueva_posicion[0], nueva_posicion[1]},
 				   n_erro,
        				smallestNodes[1]->getContent().error - n_erro //TODO MAKE SURE ITS NOT NEGATIVE!
-				       	+ smallestNodes[0]->getContent().U}; 
+				       	+ smallestNodes[0]->getContent().U }; 
 
 	smallestNodes[0]->setContent(c1);
 
