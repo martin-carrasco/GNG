@@ -35,6 +35,8 @@ protected:
     //Finds the neighbor with the max error of said node
     auto findMaxErrorLink(NodePtr node);
 
+    void logMeanError(double sum);
+
 public:
     GNGAlgorithm(unsigned int screen_width, unsigned int screen_height) : SCREEN_HEIGHT(screen_height), SCREEN_WIDTH(screen_width) {}
     bool isConnected(NodePtr node1, NodePtr node2);

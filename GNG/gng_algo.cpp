@@ -1,5 +1,14 @@
 #include "gng_algo.h"
 
+template<class Trait>
+void GNGAlgorithm<Trait>::logMeanError(double sum){
+    if(this->iteracion % this->mean_error_check == 0){
+        cout << "Mean Error " << this->mean_error_sum / this->mean_error_check << " iteration " << this->iteracion << endl;
+        this->mean_error_sum = 0;
+    }else{
+        this->mean_error_sum += sum;
+    }
+}
 
 template <class Trait>
 double GNGAlgorithm<Trait>::findMaxMeanError(){
@@ -112,6 +121,7 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 	}	
 	assert(smallestNodes[0] != nullptr && smallestNodes[1] != nullptr && smallestNodes[0] != smallestNodes[1]);
 
+    this->logMeanError(sqrt(this->getDistance(smallestNodes[0], input)));
 
     if(this->iteracion % this->mean_error_check == 0){
         cout << "Mean Error: " << this->mean_error_sum / this->mean_error_check << endl;
@@ -167,13 +177,13 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 	//Se crea una coneccion entre los nodos menores si no hay una
 	if(!this->isConnected(smallestNodes[0], smallestNodes[1]))
 		this->base_graph.insertEdge(0, smallestNodes[0]->getContent(), smallestNodes[1]->getContent(), false);
+
 	//Busca a lo largo de todos los nodos y si ya no tienen aristas los elimina del grafo
 	for(NodePtr node : this->base_graph.getNodesVector()){
 		if(node->getEdges().empty())
 			this->base_graph.deleteNode(node->getContent());
 	}
 	
-    //cout << this->SIGMA << " " << this->iteracion << endl << endl;	
 	if(this->iteracion % this->SIGMA == 0 && this->base_graph.size() < this->MAX_NODES) {
 		NodePtr max_error_node = this->findMaxError(this->base_graph);
 		NodePtr max_error_neighbor = this->findMaxErrorLink(max_error_node);
@@ -260,13 +270,7 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 	}	
 	assert(smallestNodes[0] != nullptr && smallestNodes[1] != nullptr && smallestNodes[0] != smallestNodes[1]);
 
-    //Mean error debuggin
-    if(this->iteracion % this->mean_error_check == 0){
-        cout << "Mean Error: " << this->mean_error_sum / this->mean_error_check << endl;
-        this->mean_error_sum = 0;
-    }else{
-        this->mean_error_sum += sqrt(this->getDistance(smallestNodes[0], input));
-    }
+    this->logMeanError(sqrt(this->getDistance(smallestNodes[0], input)));
 
 	//Nueva posicion de el menor nodo
 	//Esta posicion se calcula por una costante E_W multiplicado por el vector de diferencia entre
@@ -282,7 +286,7 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 	double n_erro = smallestNodes[0]->getContent().error + this->getDistance(smallestNodes[0], input);
 	NodeContent c1 = {{nueva_posicion[0], nueva_posicion[1]},
 				   n_erro,
-       				smallestNodes[1]->getContent().error - n_erro
+       				smallestNodes[1]->getContent().error - n_erro //TODO MAKE SURE ITS NOT NEGATIVE!
 				       	+ smallestNodes[0]->getContent().U}; 
 
 	smallestNodes[0]->setContent(c1);
@@ -325,18 +329,18 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 
 	//Busca el numero con la menor utilidad y divide el mayor error entre esta
 	NodeContent min_utility_content = this->findMinUtility(this->base_graph)->getContent();
-	NodeContent tmp_max_error = this->findMaxError(this->base_graph)->getContent();
+	NodePtr max_error_node = this->findMaxError(this->base_graph);
 
 
+    double utility_meassure = max_error_node->getContent().error / min_utility_content.U;
+    cout << "Utility: " << utility_meassure << endl;
     //Calcula la utilidad del nodo y lo eliminaa dependiendo de que tan baja es
-	if((tmp_max_error.error / min_utility_content.U) > this->K){	
+	if(utility_meassure > this->K){	
 		this->base_graph.deleteNode(min_utility_content);
 	}
 	
 	
-        //cout << this->SIGMA << " " << this->iteracion << endl << endl;	
 	if(this->iteracion % this->SIGMA == 0 && this->base_graph.size() < this->MAX_NODES) {
-		NodePtr max_error_node = this->findMaxError(this->base_graph);
 		NodePtr max_error_neighbor = this->findMaxErrorLink(max_error_node);
 		
 		if(max_error_neighbor == nullptr)

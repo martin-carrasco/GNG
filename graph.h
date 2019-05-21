@@ -165,7 +165,7 @@ public:
 class UGNGTrait{
 public:
 	struct Node{
-		double pos[2];
+	    double pos[2];
 		double error;
 		double U;
 		bool operator==(Node &content){

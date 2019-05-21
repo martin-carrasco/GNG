@@ -11,8 +11,8 @@
 
 using namespace cimg_library;
 
-template< class Trait>
-vector<pair<int,int>> GNGContainer<Trait>::to_single_vec(vector< vector< pair<int, int> > > vec){
+template<template <class> class Algorithm, class Trait>
+vector<pair<int,int>> GNGContainer<Algorithm, Trait>::to_single_vec(vector< vector< pair<int, int> > > vec){
     vector<pair<int, int>> toReturn;
     for(auto current_vector : vec){
         for(auto current_pair : current_vector){
@@ -22,15 +22,15 @@ vector<pair<int,int>> GNGContainer<Trait>::to_single_vec(vector< vector< pair<in
     return toReturn;
 }
 
-template<class Trait>
-void GNGContainer<Trait>::init(){}
+template<template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::init(){}
 
-template<class Trait>
-void GNGContainer<Trait>::start() {
+template<template <class> class Algorithm, class Trait>
+void GNGContainer<Algorithm, Trait>::start() {
     ImgManager<Trait> img_manager(this->window);
     vector< vector< pair<int, int> > > drawing_points;
     vector< pair<int,int> > cached_points;
-    GNGExec<GNGAlgorithm, Trait> exe(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->to_single_vec(drawing_points), UNIFORM_DISTRIBUTION);
+    GNGExec<Algorithm, Trait> exe(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->to_single_vec(drawing_points), UNIFORM_DISTRIBUTION);
 	bool is_pressed = false;
     bool is_drawn = false;
     bool cache_updated = true;
@@ -105,8 +105,8 @@ void GNGContainer<Trait>::start() {
     }
 }
 
-template <class Trait>
-void PictureGNGContainer<Trait>::init(){ 
+template<template <class> class Algorithm, class Trait>
+void PictureGNGContainer<Algorithm, Trait>::init(){ 
     string line;
     ifstream file("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/output.txt");
     while(getline(file, line)){
@@ -122,10 +122,10 @@ void PictureGNGContainer<Trait>::init(){
     file.close();
 } 
 
-template <class Trait>
-void PictureGNGContainer<Trait>::start(){
+template<template <class> class Algorithm, class Trait>
+void PictureGNGContainer<Algorithm, Trait>::start(){
     ImgManager<Trait>* img_manager = new ImgManager<Trait>(this->window);
-    GNGExec<UGNGAlgorithm, Trait>* exe = new GNGExec<UGNGAlgorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
+    GNGExec<Algorithm, Trait>* exe = new GNGExec<Algorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
     img_manager->drawPicture(this->pic_vector);
     while (!this->window->is_closed()) {
         if(exe->getExecutionCount() < MAX_EXECUTIONS){
@@ -144,8 +144,8 @@ void PictureGNGContainer<Trait>::start(){
     delete img_manager;
 }
 
-template <class Trait>
-void MovingPictureGNGContainer<Trait>::init(){ 
+template<template <class> class Algorithm, class Trait>
+void MovingPictureGNGContainer<Algorithm, Trait>::init(){ 
     string line;
     ifstream file("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/output.txt");
     while(getline(file, line)){
@@ -161,8 +161,8 @@ void MovingPictureGNGContainer<Trait>::init(){
     }
     file.close();
 } 
-template<class Trait>
-void MovingPictureGNGContainer<Trait>::movePositions(int x, int y){
+template<template <class> class Algorithm, class Trait>
+void MovingPictureGNGContainer<Algorithm, Trait>::movePositions(int x, int y){
     int dir_x = 1;
     int dir_y = 1;
     for(auto &[f, s] : this->pic_vector){
@@ -174,10 +174,10 @@ void MovingPictureGNGContainer<Trait>::movePositions(int x, int y){
         s += y;
     }
 }
-template <class Trait>
-void MovingPictureGNGContainer<Trait>::start(){
+template <template <class> class Algorithm, class Trait>
+void MovingPictureGNGContainer<Algorithm, Trait>::start(){
     ImgManager<Trait>* img_manager = new ImgManager<Trait>(this->window);
-    GNGExec<UGNGAlgorithm, Trait>* exe = new GNGExec<UGNGAlgorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
+    GNGExec<Algorithm, Trait>* exe = new GNGExec<Algorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), this->pic_vector, GenType::UNIFORM_DISTRIBUTION);
     img_manager->drawPicture(this->pic_vector);
     while (!this->window->is_closed()) {
         if(exe->getExecutionCount() < MAX_EXECUTIONS){
@@ -202,22 +202,22 @@ void MovingPictureGNGContainer<Trait>::start(){
     delete img_manager;
 
 }
-template< class Trait>
-void VideoGNGContainer<Trait>::init(){
+template<template <class> class Algorithm, class Trait>
+void VideoGNGContainer<Algorithm, Trait>::init(){
     frame_list.load_video("/home/martin/Documents/Utec/Clases/ADA/Grafo-GNG/video/output.mp4");
     if(DEBUG) cout << "Loaded video to memory" << endl;
 }
 
-template< class Trait>
-void VideoGNGContainer<Trait>::start(){
+template<template <class> class Algorithm, class Trait>
+void VideoGNGContainer<Algorithm, Trait>::start(){
     CImgList<unsigned char>::iterator it = this->frame_list.begin();
     ImgManager<Trait>* img_manager = new ImgManager<Trait>(this->window, &(*it));
     vector< pair<int,int> > drawing_points = this->parseFrame(*it);
-    GNGExec<UGNGAlgorithm, Trait>* exe = new GNGExec<UGNGAlgorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), drawing_points, GenType::UNIFORM_DISTRIBUTION); 
+    GNGExec<Algorithm, Trait>* exe = new GNGExec<Algorithm, Trait>(make_pair(SCREEN_WIDTH, SCREEN_HEIGHT), drawing_points, GenType::UNIFORM_DISTRIBUTION); 
 
     while (!this->window->is_closed()) {
         if(exe->getExecutionCount() < MAX_EXECUTIONS*5){
-            if(exe->getExecutionCount() % 700 == 0){
+            if(exe->getExecutionCount() % 1000 == 0){
                it++;
                if(it == this->frame_list.end()){
                    cimg::wait(10000);
@@ -239,14 +239,14 @@ void VideoGNGContainer<Trait>::start(){
     }
 }
 
-template< class Trait>
-void VideoGNGContainer<Trait>::binarizeImg(CImg<unsigned char> &img){
+template<template <class> class Algorithm, class Trait>
+void VideoGNGContainer<Algorithm, Trait>::binarizeImg(CImg<unsigned char> &img){
     img.quantize(16).normalize(0, 1).cut(0.2f, 0.8f).threshold(0.5f).normalize(0, 255);
 
 }
 
-template< class Trait>
-vector<pair<int,int>> VideoGNGContainer<Trait>::getBinaryPoints(CImg<unsigned char> img){
+template<template <class> class Algorithm, class Trait>
+vector<pair<int,int>> VideoGNGContainer<Algorithm, Trait>::getBinaryPoints(CImg<unsigned char> img){
     vector<pair<int,int>> binary_points;
     cimg_forXY(img, x, y){
         int R,G,B,greyscale;
@@ -261,8 +261,8 @@ vector<pair<int,int>> VideoGNGContainer<Trait>::getBinaryPoints(CImg<unsigned ch
     return binary_points;
 }
 
-template< class Trait>
-vector< pair<int,int> > VideoGNGContainer<Trait>::parseFrame(CImg<unsigned char> frame){
+template<template <class> class Algorithm, class Trait>
+vector< pair<int,int> > VideoGNGContainer<Algorithm, Trait>::parseFrame(CImg<unsigned char> frame){
     vector< pair<int,int> > black_points;
     cimg_forXY(frame, x, y){
         int R, G, B;

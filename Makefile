@@ -123,32 +123,32 @@ graph-gng/fast:
 	$(MAKE) -f CMakeFiles/graph-gng.dir/build.make CMakeFiles/graph-gng.dir/build
 .PHONY : graph-gng/fast
 
-main.o: main.cpp.o
+bench_tests.o: bench_tests.cpp.o
 
-.PHONY : main.o
+.PHONY : bench_tests.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) -f CMakeFiles/graph-gng.dir/build.make CMakeFiles/graph-gng.dir/main.cpp.o
-.PHONY : main.cpp.o
+bench_tests.cpp.o:
+	$(MAKE) -f CMakeFiles/graph-gng.dir/build.make CMakeFiles/graph-gng.dir/bench_tests.cpp.o
+.PHONY : bench_tests.cpp.o
 
-main.i: main.cpp.i
+bench_tests.i: bench_tests.cpp.i
 
-.PHONY : main.i
+.PHONY : bench_tests.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) -f CMakeFiles/graph-gng.dir/build.make CMakeFiles/graph-gng.dir/main.cpp.i
-.PHONY : main.cpp.i
+bench_tests.cpp.i:
+	$(MAKE) -f CMakeFiles/graph-gng.dir/build.make CMakeFiles/graph-gng.dir/bench_tests.cpp.i
+.PHONY : bench_tests.cpp.i
 
-main.s: main.cpp.s
+bench_tests.s: bench_tests.cpp.s
 
-.PHONY : main.s
+.PHONY : bench_tests.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) -f CMakeFiles/graph-gng.dir/build.make CMakeFiles/graph-gng.dir/main.cpp.s
-.PHONY : main.cpp.s
+bench_tests.cpp.s:
+	$(MAKE) -f CMakeFiles/graph-gng.dir/build.make CMakeFiles/graph-gng.dir/bench_tests.cpp.s
+.PHONY : bench_tests.cpp.s
 
 # Help Target
 help:
@@ -159,9 +159,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... graph-gng"
 	@echo "... edit_cache"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... bench_tests.o"
+	@echo "... bench_tests.i"
+	@echo "... bench_tests.s"
 .PHONY : help
 
 
