@@ -3,7 +3,7 @@
 template<class Trait>
 void GNGAlgorithm<Trait>::logMeanError(double sum){
     if(this->iteracion % this->mean_error_check == 0){
-        cout << "Mean Error " << this->mean_error_sum / this->mean_error_check << " iteration " << this->iteracion << endl;
+        cout << this->mean_error_sum / this->mean_error_check << " " << this->iteracion << endl;
         this->mean_error_sum = 0;
     }else{
         this->mean_error_sum += sum;
@@ -77,118 +77,88 @@ void GNGAlgorithm<Trait>::init() {
 	//Insertamos una coneccion basica con edad 0
 	this->base_graph.insertEdge(0, c1, c2, false);
 
+    cout << this->ALFA << "," << this->BETA << "," << this->E_W
+        << "," << this->E_N << "," << this->SIGMA << "," << this->MAX_NODES << "," << this->MAX_AGE << endl;  
 }
 template<class Trait>
 void GNGAlgorithm<Trait>::exec(pair<int, int> input){
-	NodePtr smallestNodes[2];
-	smallestNodes[0] = nullptr;
-	smallestNodes[1] = nullptr;
+	NodePtr winner_nodes[2] = {nullptr, nullptr};
 
-	//Seleccionamos los dos nodos con menor distancia euclidiana respecto
-	//al nodo input y los guardamos
+	//Seleccionamos los dos nodos con menor distancia euclidiana respecto a los nodos
 	
-	double dist_small2_inpt;
 	for(NodePtr node : this->base_graph.getNodesVector()){
-		if(smallestNodes[0] == nullptr)
-			smallestNodes[0] = node;
-		else if(this->getDistance(node, input) < this->getDistance(smallestNodes[0], input)){
-			smallestNodes[1] = smallestNodes[0];
-			smallestNodes[0] = node;
+		if(winner_nodes[0] == nullptr)
+			winner_nodes[0] = node;
+		else if(this->getDistance(node, input) < this->getDistance(winner_nodes[0], input)){
+			winner_nodes[1] = winner_nodes[0];
+			winner_nodes[0] = node;
 		}
-		else if(smallestNodes[1] == nullptr)
-			smallestNodes[1] = node;
+		else if(winner_nodes[1] == nullptr)
+			winner_nodes[1] = node;
 
-		else if(node < smallestNodes[1]  && node != smallestNodes[0])
-			smallestNodes[1] = node;
+		else if(node < winner_nodes[1]  && node != winner_nodes[0])
+			winner_nodes[1] = node;
 	}	
-	assert(smallestNodes[0] != nullptr && smallestNodes[1] != nullptr && smallestNodes[0] != smallestNodes[1]);
+	assert(winner_nodes[0] != nullptr && winner_nodes[1] != nullptr && winner_nodes[0] != winner_nodes[1]);
 
-    this->logMeanError(sqrt(this->getDistance(smallestNodes[0], input)));
+    this->logMeanError(sqrt(this->getDistance(winner_nodes[0], input)));
 
-	//Nueva posicion de el menor nodo
-	//Esta posicion se calcula por una costante this->E_W multiplicado por el vector de diferencia entre
-	//Input y el menor nodo
+	//Mueve el nodo hacia el input en Ew y actualiza el error
 
-	double nueva_posicion[2] = {
-			smallestNodes[0]->getContent().pos[0] + this->E_W *(input.first - smallestNodes[0]->getContent().pos[0]),
-			smallestNodes[0]->getContent().pos[1] + this->E_W * (input.second - smallestNodes[0]->getContent().pos[1])
-	};
-
-	//Actualizamos el valor del erro incrementantodolo por la distancia
-	//y insertamos la nueva posicion del nodo
-	NodeContent c1 = {{nueva_posicion[0], nueva_posicion[1]},
-				   smallestNodes[0]->getContent().error + this->getDistance(smallestNodes[0], input)};
-
-	smallestNodes[0]->setContent(c1);
+    NodeContent updated_content = {{winner_nodes[0]->getContent().pos[0], winner_nodes[0]->getContent().pos[1]}, winner_nodes[0]->getContent().error};
+    updated_content.error = updated_content.error + this->getDistance(winner_nodes[0], input);
+    updated_content.pos[0] = updated_content.pos[0] + this->E_W * (input.first - updated_content.pos[0]);
+    updated_content.pos[1] = updated_content.pos[1] + this->E_W * (input.second - updated_content.pos[1]);
+	winner_nodes[0]->setContent(updated_content);
 
 
-	for(EdgePtr e : smallestNodes[0]->getEdges()){
-		NodePtr node_destino = e->getDest(smallestNodes[0]);
-		
-		//Movemos los nodos vecinos acercandose al input
-		//En el vector de diferencia entre el nodo vecino e input multiplicado por una constante this->E_N
-		double nueva_posicion_vecino[2] = {
-				node_destino->getContent().pos[0] +  this->E_N * (input.first - node_destino->getContent().pos[0]),
-				node_destino->getContent().pos[1] +  this->E_N * (input.second - node_destino->getContent().pos[1])
-		};
+    //Update all topological neighbors of S by En
+	for(EdgePtr e : winner_nodes[0]->getEdges()){
+		NodePtr node_destino = e->getDest(winner_nodes[0]);
+	
 
-		NodeContent nc_vecino = {{nueva_posicion_vecino[0], nueva_posicion_vecino[1]},
-						   node_destino->getContent().error};
+        NodeContent updated_ne = {{node_destino->getContent().pos[0], node_destino->getContent().pos[1]}, node_destino->getContent().error};
+        updated_ne.pos[0] = updated_ne.pos[0] + this->E_N * (input.first - updated_ne.pos[0]);
+        updated_ne.pos[1] = updated_ne.pos[1] + this->E_N * (input.second - updated_ne.pos[1]);
+		node_destino->setContent(updated_ne);
+        
 
-		node_destino->setContent(nc_vecino);
-		e->setContent(e->getContent()+1); 
-
-        if(node_destino == smallestNodes[1])
+        if(node_destino == winner_nodes[1])
             e->setContent(0);
-
-		//Eliminamos la arista si exede el maximo age
-		if(e->getContent() > this->MAX_AGE) {
-			this->base_graph.deleteEdge(smallestNodes[0]->getContent(),
-							  e->getDest(smallestNodes[0])->getContent(),
-							  e->getContent());
-		}
+		e->setContent(e->getContent()+1); 
 	}
-
+    
 	//Se crea una coneccion entre los nodos menores si no hay una
-	if(!this->isConnected(smallestNodes[0], smallestNodes[1]))
-		this->base_graph.insertEdge(0, smallestNodes[0]->getContent(), smallestNodes[1]->getContent(), false);
+	if(!this->isConnected(winner_nodes[0], winner_nodes[1]))
+		this->base_graph.insertEdge(0, winner_nodes[0]->getContent(), winner_nodes[1]->getContent(), false);
 
+    //Quita los nodos con + de MAX_AGE
+    for(NodePtr n : this->base_graph.getNodesVector()){
+        for(EdgePtr e : n->getEdges()){
+            if(e->getContent() >= this->MAX_AGE)
+                this->base_graph.deleteEdge(n->getContent(), e->getDest(n)->getContent(), e->getContent());
+        }
+    }
 	//Busca a lo largo de todos los nodos y si ya no tienen aristas los elimina del grafo
 	for(NodePtr node : this->base_graph.getNodesVector()){
 		if(node->getEdges().empty())
 			this->base_graph.deleteNode(node->getContent());
 	}
 	
+
 	if(this->iteracion % this->SIGMA == 0 && this->base_graph.size() < this->MAX_NODES) {
 		NodePtr max_error_node = this->findMaxError(this->base_graph);
 		NodePtr max_error_neighbor = this->findMaxErrorLink(max_error_node);
-
-
 		assert(max_error_neighbor != nullptr);
 			
-
-
-		//Creamps el contenido de un nuevo nodo y asignamos sus posiciones a la media
-		//De las posiciones de los nodos con max_error y su max_error_neighbor
-
 		NodeContent content_max = max_error_node->getContent();
 		NodeContent content_neighbor = max_error_neighbor->getContent();
 
-		double pos_modificada[2] = {
-				(content_max.pos[0] + content_neighbor.pos[0]) / 2,
-				(content_neighbor.pos[1] + content_max.pos[1]) / 2
-		};
-		NodeContent content = {{pos_modificada[0], pos_modificada[1]},
-				content_max.error * this->ALFA
-		};
+        NodeContent new_content = {{0, 0}, 0};
+        new_content.pos[0] = (content_max.pos[0] + content_neighbor.pos[0]) / 2;
+        new_content.pos[1] = (content_max.pos[1] + content_neighbor.pos[1]) / 2;
 
-		this->base_graph.insertNode(content);
-
-		//Creamos una arista entre max y su maximo vecino y el nuevo nodo
-		//Asimismo eliminamos la arista entre el maximo y su vecino
-		this->base_graph.insertEdge(0, content_max, content, false);
-		this->base_graph.insertEdge(0, content_neighbor, content, false);
-
+        //////////////////////////// Borra de manera mas simple /////////////
 		EdgePtr edgePtr = nullptr;
 
 		for(EdgePtr edge : max_error_node->getEdges()){
@@ -199,16 +169,21 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 		this->base_graph.deleteEdge(content_max, content_neighbor,
 						  edgePtr->getContent());
 
-		//Decrementamos el error de ambos nodos por this->ALFA y los asignamos
-		//Asimismo decrementamos el erro de todos los nodos de la forma
-		// error_x <- error_x - this->BETA * error_x
-
-		content_max.error = content_max.error * this->ALFA;
+        ///////////////////////////////////////////////////////////
+        
 		content_neighbor.error = content_neighbor.error * this->ALFA;
+		content_max.error = content_max.error * this->ALFA;
+        new_content.error = content_max.error * this->ALFA;
+
+		this->base_graph.insertNode(new_content);
+
 
 		max_error_node->setContent(content_max);
 		max_error_neighbor->setContent(content_neighbor);
+        this->base_graph.insertNode(new_content);
 
+		this->base_graph.insertEdge(0, content_max, new_content, false);
+		this->base_graph.insertEdge(0, content_neighbor, new_content, false);
 	}
 
 	for(NodePtr node_tmp : this->base_graph.getNodesVector()){
@@ -217,134 +192,91 @@ void GNGAlgorithm<Trait>::exec(pair<int, int> input){
 			node_tmp->setContent(content_tmp);
 	}
 	this->iteracion++;
-
 }
-
 
 template<class Trait>
 void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
-	NodePtr smallestNodes[2];
-	smallestNodes[0] = nullptr;
-	smallestNodes[1] = nullptr;
+	NodePtr winner_nodes[2] = {nullptr, nullptr};
 
-	//Seleccionamos los dos nodos con menor distancia euclidiana respecto
-	//al nodo input y los guardamos
+	//Seleccionamos los dos nodos con menor distancia euclidiana respecto a los nodos
 	
 	for(NodePtr node : this->base_graph.getNodesVector()){
-		if(smallestNodes[0] == nullptr)
-			smallestNodes[0] = node;
-		else if(this->getDistance(node, input) < this->getDistance(smallestNodes[0], input)){
-			smallestNodes[1] = smallestNodes[0];
-			smallestNodes[0] = node;
+		if(winner_nodes[0] == nullptr)
+			winner_nodes[0] = node;
+		else if(this->getDistance(node, input) < this->getDistance(winner_nodes[0], input)){
+			winner_nodes[1] = winner_nodes[0];
+			winner_nodes[0] = node;
 		}
-		else if(smallestNodes[1] == nullptr)
-			smallestNodes[1] = node;
+		else if(winner_nodes[1] == nullptr)
+			winner_nodes[1] = node;
 
-		else if(node < smallestNodes[1]  && node != smallestNodes[0])
-			smallestNodes[1] = node;
+		else if(node < winner_nodes[1]  && node != winner_nodes[0])
+			winner_nodes[1] = node;
 	}	
-	assert(smallestNodes[0] != nullptr && smallestNodes[1] != nullptr && smallestNodes[0] != smallestNodes[1]);
+	assert(winner_nodes[0] != nullptr && winner_nodes[1] != nullptr && winner_nodes[0] != winner_nodes[1]);
 
-    this->logMeanError(sqrt(this->getDistance(smallestNodes[0], input)));
+    this->logMeanError(sqrt(this->getDistance(winner_nodes[0], input)));
 
-	//Nueva posicion de el menor nodo
-	//Esta posicion se calcula por una costante E_W multiplicado por el vector de diferencia entre
-	//Input y el menor nodo
+	//Mueve el nodo hacia el input en Ew y actualiza el error
 
-	double nueva_posicion[2] = {
-			smallestNodes[0]->getContent().pos[0] + this->E_W *(input.first - smallestNodes[0]->getContent().pos[0]),
-			smallestNodes[0]->getContent().pos[1] + this->E_W * (input.second - smallestNodes[0]->getContent().pos[1])
-	};
+    NodeContent updated_content = {{winner_nodes[0]->getContent().pos[0], winner_nodes[0]->getContent().pos[1]}, winner_nodes[0]->getContent().error, winner_nodes[0]->getContent().U};
+    updated_content.pos[0] = updated_content.pos[0] + this->E_W * (input.first - updated_content.pos[0]);
+    updated_content.pos[1] = updated_content.pos[1] + this->E_W * (input.second - updated_content.pos[1]);
+    updated_content.U = updated_content.U + winner_nodes[1]->getContent().error - updated_content.error ;
+    updated_content.error = updated_content.error + this->getDistance(winner_nodes[0], input);
+	winner_nodes[0]->setContent(updated_content);
 
-	//Actualizamos el valor del erro incrementantodolo por la distancia
-	//y insertamos la nueva posicion del nodo
-	double n_erro = smallestNodes[0]->getContent().error + this->getDistance(smallestNodes[0], input);
-	NodeContent c1 = {{nueva_posicion[0], nueva_posicion[1]},
-				   n_erro,
-       				smallestNodes[1]->getContent().error - n_erro //TODO MAKE SURE ITS NOT NEGATIVE!
-				       	+ smallestNodes[0]->getContent().U }; 
 
-	smallestNodes[0]->setContent(c1);
-
+    //Update all topological neighbors of S by En
+	for(EdgePtr e : winner_nodes[0]->getEdges()){
+		NodePtr node_destino = e->getDest(winner_nodes[0]);
 	
-	for(EdgePtr e : smallestNodes[0]->getEdges()){
-		NodePtr node_destino = e->getDest(smallestNodes[0]);
-		
 
-		//Movemos los nodos vecinos acercandose al input
-		//En el vector de diferencia entre el nodo vecino e input multiplicado por una constante this->E_N
-		double nueva_posicion_vecino[2] = {
-				node_destino->getContent().pos[0] +  this->E_N * (input.first - node_destino->getContent().pos[0]),
-				node_destino->getContent().pos[1] +  this->E_N * (input.second - node_destino->getContent().pos[1])
-		};
+        NodeContent updated_ne = {{node_destino->getContent().pos[0], node_destino->getContent().pos[1]}, 
+            node_destino->getContent().error, node_destino->getContent().U};
+        updated_ne.pos[0] = updated_ne.pos[0] + this->E_N * (input.first - updated_ne.pos[0]);
+        updated_ne.pos[1] = updated_ne.pos[1] + this->E_N * (input.second - updated_ne.pos[1]);
+		node_destino->setContent(updated_ne);
+        
 
-		NodeContent nc_vecino = {{nueva_posicion_vecino[0], nueva_posicion_vecino[1]},
-						   node_destino->getContent().error,
-						   node_destino->getContent().U};
-
-		node_destino->setContent(nc_vecino);
-
-		e->setContent(e->getContent()+1); 
-
-        if(node_destino == smallestNodes[1])
+        if(node_destino == winner_nodes[1])
             e->setContent(0);
-
-		//Eliminamos la arista si exede el maximo age
-		if(e->getContent() > this->MAX_AGE) {
-			this->base_graph.deleteEdge(smallestNodes[0]->getContent(),
-							  e->getDest(smallestNodes[0])->getContent(),
-							  e->getContent());
-		}
-
+		e->setContent(e->getContent()+1); 
 	}
-
+    
 	//Se crea una coneccion entre los nodos menores si no hay una
-	if(!this->isConnected(smallestNodes[0], smallestNodes[1]))
-		this->base_graph.insertEdge(0, smallestNodes[0]->getContent(), smallestNodes[1]->getContent(), false);
+	if(!this->isConnected(winner_nodes[0], winner_nodes[1]))
+		this->base_graph.insertEdge(0, winner_nodes[0]->getContent(), winner_nodes[1]->getContent(), false);
 
-	//Busca el numero con la menor utilidad y divide el mayor error entre esta
-	NodeContent min_utility_content = this->findMinUtility(this->base_graph)->getContent();
+    //Quita los nodos con + de MAX_AGE
+    for(NodePtr n : this->base_graph.getNodesVector()){
+        for(EdgePtr e : n->getEdges()){
+            if(e->getContent() >= this->MAX_AGE)
+                this->base_graph.deleteEdge(n->getContent(), e->getDest(n)->getContent(), e->getContent());
+        }
+    }
 	NodePtr max_error_node = this->findMaxError(this->base_graph);
+    NodePtr min_util = this->findMinUtility(this->base_graph);
+    
+    double utility_meassure = (max_error_node->getContent().error / min_util->getContent().U);
+    if(utility_meassure > this->K && min_util->getContent().U != 0){
+        this->base_graph.deleteNode(min_util->getContent());
+    }
 
-
-    double utility_meassure = max_error_node->getContent().error / min_utility_content.U;
-    cout << "Utility: " << utility_meassure << endl;
-    //Calcula la utilidad del nodo y lo eliminaa dependiendo de que tan baja es
-	if(utility_meassure > this->K){	
-		this->base_graph.deleteNode(min_utility_content);
-	}
-	
-	
 	if(this->iteracion % this->SIGMA == 0 && this->base_graph.size() < this->MAX_NODES) {
+		NodePtr max_error_node = this->findMaxError(this->base_graph);
 		NodePtr max_error_neighbor = this->findMaxErrorLink(max_error_node);
-		
-		if(max_error_neighbor == nullptr)
-			return;
-		//assert(max_error_neighbor != nullptr);
+		assert(max_error_neighbor != nullptr);
 			
-
-
-		//Creamps el contenido de un nuevo nodo y asignamos sus posiciones a la media
-		//De las posiciones de los nodos con max_error y su max_error_neighbor
-
 		NodeContent content_max = max_error_node->getContent();
 		NodeContent content_neighbor = max_error_neighbor->getContent();
 
-		double pos_modificada[2] = {
-				(content_max.pos[0] + content_neighbor.pos[0]) / 2,
-				(content_neighbor.pos[1] + content_max.pos[1]) / 2
-		};
-		NodeContent content = {{pos_modificada[0], pos_modificada[1]},
-				content_max.error * this->ALFA, (content_max.U + content_neighbor.U) / 2
-		};
+        NodeContent new_content = {{0, 0}, 0};
+        new_content.pos[0] = (content_max.pos[0] + content_neighbor.pos[0]) / 2;
+        new_content.pos[1] = (content_max.pos[1] + content_neighbor.pos[1]) / 2;
+        new_content.U = (content_max.U + content_neighbor.U) / 2;
 
-		this->base_graph.insertNode(content);
-
-		//Creamos una arista entre max y su maximo vecino y el nuevo nodo
-		//Asimismo eliminamos la arista entre el maximo y su vecino
-		this->base_graph.insertEdge(0, content_max, content, false);
-		this->base_graph.insertEdge(0, content_neighbor, content, false);
-
+        //////////////////////////// Borra de manera mas simple /////////////
 		EdgePtr edgePtr = nullptr;
 
 		for(EdgePtr edge : max_error_node->getEdges()){
@@ -355,30 +287,34 @@ void UGNGAlgorithm<Trait>::exec(pair<int, int> input){
 		this->base_graph.deleteEdge(content_max, content_neighbor,
 						  edgePtr->getContent());
 
-		//Decrementamos el error de ambos nodos por this->ALFA y los asignamos
-		//Asimismo decrementamos el erro de todos los nodos de la forma
-		// error_x <- error_x - this->BETA * error_x
-
-		content_max.error = content_max.error * this->ALFA;
+        ///////////////////////////////////////////////////////////
+        
 		content_neighbor.error = content_neighbor.error * this->ALFA;
+		content_max.error = content_max.error * this->ALFA;
+        new_content.error = content_max.error;
+
+		this->base_graph.insertNode(new_content);
+
 
 		max_error_node->setContent(content_max);
 		max_error_neighbor->setContent(content_neighbor);
+        this->base_graph.insertNode(new_content);
 
+		this->base_graph.insertEdge(0, content_max, new_content, false);
+		this->base_graph.insertEdge(0, content_neighbor, new_content, false);
 	}
 
-    for(NodePtr node_tmp : this->base_graph.getNodesVector()){
-        NodeContent content_tmp = node_tmp->getContent();
-        content_tmp.error = content_tmp.error -  this->BETA * content_tmp.error;
-        content_tmp.U = content_tmp.U - this->BETA * content_tmp.U;
-        node_tmp->setContent(content_tmp);
-    }
+	for(NodePtr node_tmp : this->base_graph.getNodesVector()){
+			NodeContent content_tmp = node_tmp->getContent();
+			content_tmp.error = content_tmp.error -  this->BETA * content_tmp.error;
+            //content_tmp.U = content_tmp.U - this->BETA * content_tmp.U;
+			node_tmp->setContent(content_tmp);
+	}
 	this->iteracion++;
 
 }
 template<class Trait>
 void UGNGAlgorithm<Trait>::init() {
-	//this->iteracion = 0;
 	this->base_graph.clear();
 	double pos1[2];
 	double pos2[2];
@@ -399,6 +335,9 @@ void UGNGAlgorithm<Trait>::init() {
 
 	//Insertamos una coneccion basica con edad 0
 	this->base_graph.insertEdge(0, c1, c2, false);
+
+    cout << this->K << "," << this->ALFA << "," << this->BETA << "," << this->E_W
+        << "," << this->E_N << "," << this->SIGMA << "," << this->MAX_NODES << "," << this->MAX_AGE << endl;  
 }
 template <class Trait>
 bool GNGAlgorithm<Trait>::isConnected(NodePtr node1, NodePtr node2){

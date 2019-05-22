@@ -12,16 +12,16 @@ protected:
     typedef ::Node<Graph<Trait>>* NodePtr;
 
     double mean_error_sum = 0; //Sum of mean error until reset
-    int mean_error_check = 500; // Mean error iteration check
+    int mean_error_check = 5000; // Mean error iteration check
 
     double K = 3; //Medida de utilidad para eliminar un nodo
-    int SIGMA = 300; //Mean error (Medida de error maxima aceptable)
-    double ALFA = 0.5;
+    int SIGMA = 300; //Iteraciones hasta insertar
+    double ALFA = 0.5; //Decremento de error por insercion
     double BETA =0.0005; //Decremento del error por ejecucion
-    double E_W = 0.05; //Movimiento del nodo de comparacion respecto al input
-    double E_N = 0.0006; //Movimiento del nodo input respecto al nodo de comparacion
-    double MAX_AGE = 100; //Vida de los edges de los nodos con minimo error
-    int MAX_NODES = 70; //TODO cambiar ???
+    double E_W = 0.05; //Movimiento del el nodo ganador hacia el input
+    double E_N = 0.0006; //Movimiento de los vecinos del nodo ganador hacia el input
+    double MAX_AGE = 100; //Maximo de age
+    int MAX_NODES = 100; //Max nodes
 
 
     unsigned int SCREEN_HEIGHT;
@@ -62,7 +62,7 @@ class UGNGAlgorithm : public GNGAlgorithm<Trait> {
     typedef ::Node<Graph<Trait>>* NodePtr;
 
 
-    double K = 1; //Medida de utilidad para eliminar un nodo
+    double K = 200; //Medida de utilidad para eliminar un nodo
     int SIGMA = 600; //Mean error (Medida de error maxima aceptable)
     double ALFA = 0.5;
     double BETA =0.0005; //Decremento del error por ejecucion

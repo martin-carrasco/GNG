@@ -38,7 +38,7 @@ void ugng_video(){
 int main(){
     //Growing Neural Gas test
    
-   // gng_still();
+    //gng_still();
 
     //gng_moving();
 
@@ -49,7 +49,8 @@ int main(){
 
     //ugng_moving();
 
-    gng_video();
+    ugng_video();
+
     
     return 0;
 }

@@ -97,8 +97,10 @@ void Graph<CustomTrait>::deleteNode(NodeContent content){
     //Finalmente hacemos una iteracion en la el vector de nodos, lo borramos de ahi
     //y liberamos el puntero
     for(nodes_iterator = nodes_vector.begin();nodes_iterator != nodes_vector.end();nodes_iterator++){
-        if(*nodes_iterator == node)
+        if(*nodes_iterator == node){
             nodes_vector.erase(nodes_iterator);
+            break;
+        }
     }
 
     delete node;

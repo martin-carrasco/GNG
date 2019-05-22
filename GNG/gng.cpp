@@ -7,7 +7,7 @@
 #include <sstream>
 
 #define DEBUG 1
-#define MAX_EXECUTIONS 40000
+#define MAX_EXECUTIONS 100000
 
 using namespace cimg_library;
 
